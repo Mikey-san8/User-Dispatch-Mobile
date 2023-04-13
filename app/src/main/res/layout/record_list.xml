@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/recordList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="This is where record put"
+        android:autoSizeMaxTextSize="18sp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:textStyle="bold"
+        android:gravity="center|left"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:layout_margin="5dp"
+        android:background="@drawable/border2"
+        android:autoSizeTextType="uniform"
+        android:layout_gravity="center"
+        android:drawableEnd="@drawable/ic_baseline_history_24"
+        app:drawableTint="#A8A8A8" />
+
+</FrameLayout>

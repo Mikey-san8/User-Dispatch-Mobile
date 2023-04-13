@@ -1,11 +1,18 @@
 package com.example.dispatchmain;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
@@ -15,12 +22,16 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,12 +40,30 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.SetOptions;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 @SuppressWarnings("ALL")
-public class MainFragment extends Fragment implements View.OnClickListener
+public class MainFragment extends Fragment implements View.OnClickListener, LocationListener
 {
-
     public View main;
+
+    private BottomNavigationView bottomNavigationView;
+
+    private LocationManager locationManager;
+
+    private static final int REQUEST_LOCATION_PERMISSIONS = 1;
 
     FirebaseAuth auth = FirebaseAuth.getInstance();
 
@@ -58,7 +87,11 @@ public class MainFragment extends Fragment implements View.OnClickListener
                             addressLay;
 
     public TextView accountN,
-                    accountE;
+                    accountE,
+                    textCurrent;
+
+    DateFormat dateFormat;
+
 
     public MainFragment()
     {
@@ -70,9 +103,39 @@ public class MainFragment extends Fragment implements View.OnClickListener
     {
         main = inflater.inflate(R.layout.main, container, false);
 
+        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+
         setEvents();
 
         return main;
+    }
+
+    @Override
+    public void onLocationChanged(Location location)
+    {
+        String latitude = String.valueOf(location.getLatitude());
+        String longitude = String.valueOf(location.getLongitude());
+        textCurrent = main.findViewById(R.id.textCurrent);
+        textCurrent.setText(latitude + ", " + longitude);
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+
+        locationManager.removeUpdates(this);
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0L, (float) 0, (LocationListener) this);
+        } else {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_PERMISSIONS);
+        }
     }
 
     public void setEvents()
@@ -93,6 +156,9 @@ public class MainFragment extends Fragment implements View.OnClickListener
         blinkBtn3.setOnClickListener(this);
 
         main.findViewById(R.id.commentClick).setOnClickListener(this);
+        main.findViewById(R.id.sendButton).setOnClickListener(this);
+        main.findViewById(R.id.checkOnMap).setOnClickListener(this);
+        main.findViewById(R.id.seeLocation).setOnClickListener(this);
 
         fireCallSheet = main.findViewById(R.id.fireCallSheet);
 
@@ -198,13 +264,88 @@ public class MainFragment extends Fragment implements View.OnClickListener
     @Override
     public void onClick(View v)
     {
+        Fragment fragment;
+        Fragment information;
+
+        Bundle bundle = new Bundle();
+        String navigation;
+
         switch (v.getId())
         {
             case R.id.fire_btn2:
                 fireCall.setState(BottomSheetBehavior.STATE_EXPANDED);
                 userDetails();
                 break;
+            case R.id.sendButton:
+
+                String nUser = userN.getText().toString();
+                String pUser = userP.getText().toString();
+                String lUser = userA.getText().toString();
+
+                sendReport(nUser, pUser, lUser);
+
+                fireCall.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+                bundle.putString("Name", nUser);
+                bundle.putString("Phone", pUser);
+                bundle.putString("Address", lUser);
+                bundle.putString("Location", lUser);
+                bundle.putString("TimeDate", dateFormat.format(new Date()));
+
+                information = new InformationFragment();
+                information.setArguments(bundle);
+                navigation = "information";
+                Toast.makeText(main.getContext(), "SENDING REPORT", Toast.LENGTH_LONG).show();
+
+                new CountDownTimer(6000, 1000)
+                {
+
+                    public void onTick(long millisUntilFinished)
+                    {
+
+                    }
+
+                    public void onFinish()
+                    {
+                        Toast.makeText(main.getContext(), "REPORT SENT", Toast.LENGTH_SHORT).show();
+                        new CountDownTimer(1500, 1000){
+
+                            @Override
+                            public void onTick(long millisUntilFinished) {
+
+                            }
+
+                            @Override
+                            public void onFinish()
+                            {
+                                ((MainActivity) getActivity()).navigateToFragment(information, navigation);
+                            }
+                        }.start();
+                    }
+                }.start();
+
+
+                break;
+            case R.id.checkOnMap:
+                fragment = new MapFragment();
+                navigation = "map";
+
+                ((MainActivity) getActivity()).navigateToFragment(fragment, navigation);
+                break;
+            case R.id.seeLocation:
+                fragment = new MapFragment();
+                navigation = "map";
+
+                ((MainActivity) getActivity()).navigateToFragment(fragment, navigation);
+                break;
         }
+    }
+
+    private void navigateToFragment(Fragment fragment)
+    {
+        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+        transaction.replace(R.id.container, fragment);
+        transaction.commit();
     }
 
     public void blinking()
@@ -253,7 +394,8 @@ public class MainFragment extends Fragment implements View.OnClickListener
     }
 
 
-    private void exit(){
+    private void exit()
+    {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(main.getContext());
         builder.setMessage("Are you sure you want to exit?");
@@ -301,7 +443,6 @@ public class MainFragment extends Fragment implements View.OnClickListener
 
                 accountN.setText(firstName + " " + lastName);
                 accountE.setText(email);
-
             }
 
             @Override
@@ -312,9 +453,45 @@ public class MainFragment extends Fragment implements View.OnClickListener
         databaseReference.keepSynced(true);
     }
 
+    public void sendReport(String name, String phone, String location)
+    {
+
+        String userId = auth.getCurrentUser().getUid();
+        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+        CollectionReference usersRef = firebaseFirestore.collection("Users");
+        dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault());
+        String timeDate = dateFormat.format(new Date());
+
+        Map<String, Object> report = new HashMap<>();
+        report.put("FullName", name);
+        report.put("MobileNumber", phone);
+        report.put("Location", location);
+        report.put("Date & Time", timeDate);
+
+        DocumentReference userRef = firebaseFirestore.collection("Users").document(userId);
+        CollectionReference reportRef = userRef.collection("Reports");
+
+        reportRef.add(report);
+
+    }
+
     public void hideKeyboard(View view)
     {
         InputMethodManager inputMethodManager =(InputMethodManager)getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == REQUEST_LOCATION_PERMISSIONS) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0L, (float) 0, (LocationListener) this);
+            } else
+            {
+                // Permission denied
+                // Handle accordingly (e.g. show a message to the user)
+            }
+        }
     }
 }

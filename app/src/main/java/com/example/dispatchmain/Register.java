@@ -12,13 +12,22 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Register extends AppCompatActivity{
 
@@ -28,6 +37,8 @@ public class Register extends AppCompatActivity{
     ConstraintLayout register_tap_screen;
 
     private DatabaseReference mDatabase;
+
+    String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +89,9 @@ public class Register extends AppCompatActivity{
         String address = typeAddress.getText().toString();
 
         if (firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || password.isEmpty() || confirm.isEmpty() || phone.isEmpty() || address.isEmpty())
-        { Toast.makeText(this, "Please fill all fields", Toast.LENGTH_LONG).show(); }
+        {
+            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_LONG).show();
+        }
         else
         {
             if(!password.equals(confirm))
@@ -90,11 +103,12 @@ public class Register extends AppCompatActivity{
 
             else
 
-            { auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
-
+            {
+                auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task ->
+                {
                     if(task.isSuccessful())
                     {
-                        String userId = auth.getCurrentUser().getUid();
+                        userId = auth.getCurrentUser().getUid();
                         String userName = "User" + userId;
                         mDatabase = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference();
                         User user = new User(firstName, lastName, email, address, phone, password, userId, userName);
@@ -102,9 +116,21 @@ public class Register extends AppCompatActivity{
                                 .addOnSuccessListener(aVoid -> Toast.makeText(Register.this, "Success", Toast.LENGTH_SHORT).show())
                                 .addOnFailureListener(e -> Toast.makeText(Register.this, "Registration Failed", Toast.LENGTH_SHORT).show());
                         logoutUser();
-                    } else { Toast.makeText(Register.this, "Registration Failed" + task.getException().getMessage(), Toast.LENGTH_SHORT).show(); }
+                    }
+                    else
+                    {
+                        Toast.makeText(Register.this, "Registration Failed" + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
                 });
-            }}}
-    private void switchToLogin() { Intent intent = new Intent(this, Login.class); startActivity(intent); finish(); }
-    private void logoutUser() { FirebaseAuth.getInstance().signOut(); Intent intent = new Intent(this, Login.class); startActivity(intent); finish(); }
+
+            }
+        }
+    }
+    private void switchToLogin() {
+        Intent intent = new Intent(this, Login.class); startActivity(intent); finish();
+    }
+
+    private void logoutUser() {
+        FirebaseAuth.getInstance().signOut(); Intent intent = new Intent(this, Login.class); startActivity(intent); finish();
+    }
 }

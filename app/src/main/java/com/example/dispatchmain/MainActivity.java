@@ -4,16 +4,43 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
+import android.Manifest;
+import android.animation.ObjectAnimator;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Looper;
+import android.provider.Settings;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.MediaController;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,6 +50,17 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.maps.GeoApiContext;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.single.PermissionListener;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @SuppressWarnings("ALL")
 public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener,
@@ -60,9 +98,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         }
 
         bottomNavigation();
-
         mainEvents();
-
     }
 
     public void mainEvents()
@@ -77,9 +113,6 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
         navigationView.setCheckedItem(R.id.nav_home);
         navigationView.setNavigationItemSelectedListener(this);
-
-
-
     }
 
     public void bottomNavigation()
@@ -90,37 +123,42 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         bottomNavigationView.setSelectedItemId(R.id.btmHome);
     }
 
+    public void clickMap()
+    {
+        bottomNavigationView.setSelectedItemId(R.id.btmMap);
+    }
+
     @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item)
+    {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+        transaction.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left, R.anim.enter_from_left, R.anim.exit_to_right);
 
         switch (item.getItemId())
-
         {
             case R.id.btmHome:
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.container, mainFragment)
-                        .commit();
+                transaction.replace(R.id.container, mainFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
                 return true;
 
             case R.id.btmMap:
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.container, mapFragment)
-                        .commit();
+                transaction.replace(R.id.container, mapFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
                 return true;
 
             case R.id.btmRecord:
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.container, recordFragment)
-                        .commit();
+                transaction.replace(R.id.container, recordFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
                 return true;
 
-//            case R.id.btmMenu:
-//                drawerLayout.openDrawer(navigationView, true);
-//                userDetails();
-//                return true;
+            case R.id.btmMenu:
+                drawerLayout.openDrawer(navigationView, true);
+                userDetails();
+                return true;
 
             case R.id.nav_logout:
                 logoutUser();
@@ -192,5 +230,33 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         });
         databaseReference.keepSynced(true);
     }
+
+    public void navigateToFragment(Fragment fragment, String navigation)
+    {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction
+                .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left, R.anim.enter_from_left, R.anim.exit_to_right)
+                .replace(R.id.container, fragment)
+                .addToBackStack(null)
+                .commit();
+
+        switch (navigation)
+        {
+            case "map":
+                bottomNavigationView.setSelectedItemId(R.id.btmMap);
+                break;
+            case "main":
+                bottomNavigationView.setSelectedItemId(R.id.btmHome);
+                break;
+        }
+
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        super.onBackPressed();
+    }
+
 
 }
