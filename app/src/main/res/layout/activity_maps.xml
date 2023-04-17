@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -11,26 +11,152 @@
             android:id="@+id/mapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             tools:layout="@layout/map_view_fragment"
-            class="com.google.android.gms.maps.SupportMapFragment" />
+            class="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_alignWithParentIfMissing="true"/>
 
         <ImageView
             android:id="@+id/currentLocation"
             android:layout_width="55dp"
             android:layout_height="55dp"
             android:scaleType="center"
-            android:background="@drawable/shape_for_call"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.958"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.772"
-            app:srcCompat="@drawable/ic_baseline_my_location_24" />
+            app:srcCompat="@drawable/ic_baseline_my_location_24"
+            android:layout_above="@+id/linearSeeList"
+            android:layout_alignParentEnd="true" />
 
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutSearch"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            app:boxBackgroundColor="#FFFFFF"
+            app:boxCornerRadiusBottomEnd="0dp"
+            app:boxCornerRadiusBottomStart="0dp"
+            app:boxCornerRadiusTopEnd="0dp"
+            app:boxCornerRadiusTopStart="0dp"
+            app:endIconDrawable="@drawable/pin_location"
+            app:endIconMode="custom"
+            app:endIconTint="#FDA7A7"
+            app:startIconDrawable="@drawable/ic_baseline_search_24"
+            app:startIconTint="#C9E6FF">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/searchPlace"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:ellipsize="middle"
+                    android:gravity="center|left"
+                    android:hint="Search Location"
+                    android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/border2"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_below="@+id/layoutSearch"
+            android:layout_alignParentStart="true"
+            android:id="@+id/linearFindStation">
+
+                <ImageView
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_gravity="center"
+                    app:srcCompat="@drawable/ic_baseline_fire_extinguisher_24" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="10dp"
+                    android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textFindStations"
+                            android:layout_width="130dp"
+                            android:layout_height="wrap_content"
+                            android:drawablePadding="3dp"
+                            android:ellipsize="end"
+                            android:lines="1"
+                            android:text="Fire Stations Nearby: 5"
+                            android:textColor="#505050"
+                            android:textSize="12sp"
+                            android:textStyle="italic" />
+
+                        <TextView
+                            android:id="@+id/findStations"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Find Fire Stations"
+                            android:textColor="#FF5858"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+
+                </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearSeeList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/border2"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="5dp"
+            android:layout_marginEnd="5dp">
+
+                <ImageView
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_gravity="center"
+                    app:srcCompat="@drawable/responder" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="10dp"
+                    android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textMapResponders"
+                            android:layout_width="90dp"
+                            android:layout_height="wrap_content"
+                            android:drawablePadding="3dp"
+                            android:ellipsize="end"
+                            android:lines="1"
+                            android:text="Responder/s: 5"
+                            android:textColor="#505050"
+                            android:textSize="12sp"
+                            android:textStyle="italic" />
+
+                        <TextView
+                            android:id="@+id/checkResponders"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="See List"
+                            android:textColor="#FF5858"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+
+                </LinearLayout>
+
+        </LinearLayout>
+
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:id="@+id/coordinatorLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="5dp"
+            android:layout_below="@+id/linearFindStation">
+
+                <include layout="@layout/btmsearch" />
+
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</RelativeLayout>

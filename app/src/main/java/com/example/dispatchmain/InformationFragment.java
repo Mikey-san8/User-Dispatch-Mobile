@@ -5,23 +5,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.TextClock;
 import android.widget.TextView;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 public class InformationFragment extends Fragment
 {
@@ -37,7 +27,10 @@ public class InformationFragment extends Fragment
                 infoPhone,
                 infoAddress,
                 infoLocation,
+                infoComment,
                 timeDate;
+
+    String navigation;
 
     public InformationFragment()
     {
@@ -60,6 +53,7 @@ public class InformationFragment extends Fragment
         infoPhone = info.findViewById(R.id.infoPhone);
         infoAddress = info.findViewById(R.id.infoAddress);
         infoLocation = info.findViewById(R.id.infoLocation);
+        infoComment = info.findViewById(R.id.infoComment);
         timeDate = info.findViewById(R.id.infoDate);
 
         Bundle bundle = getArguments();
@@ -67,12 +61,14 @@ public class InformationFragment extends Fragment
         String phone = bundle.getString("Phone");
         String address = bundle.getString("Address");
         String location = bundle.getString("Location");
+        String comment = bundle.getString("Comment");
         String time = bundle.getString("TimeDate");
 
         infoName.setText(name);
         infoPhone.setText(phone);
         infoAddress.setText(address);
         infoLocation.setText(location);
+        infoComment.setText(comment);
         timeDate.setText(time);
 
         info.findViewById(R.id.logo_demo).setOnClickListener(new View.OnClickListener()
@@ -82,18 +78,19 @@ public class InformationFragment extends Fragment
             {
                 Fragment map;
                 map = new MapFragment();
-                String navigation = "map";
+                navigation = "map";
                 ((MainActivity) requireActivity()).navigateToFragment(map, navigation);
             }
         });
 
-        info.findViewById(R.id.recordClose).setOnClickListener(new View.OnClickListener() {
+        info.findViewById(R.id.recordClose).setOnClickListener(new View.OnClickListener()
+        {
             @Override
             public void onClick(View v)
             {
                 Fragment main;
                 main = new MainFragment();
-                String navigation = "main";
+                navigation = "main";
                 ((MainActivity) requireActivity()).navigateToFragment(main, navigation);
             }
         });

@@ -7,6 +7,7 @@
     android:orientation="vertical"
     app:behavior_peekHeight="0dp"
     android:background="@drawable/shapebtmsheet"
+    android:fitsSystemWindows="true"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
     <ImageView
@@ -18,221 +19,266 @@
         app:srcCompat="@drawable/remove"
         app:tint="#7A4646" />
 
-    <LinearLayout
-        android:id="@+id/linearLayout2"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingTop="16dp"
-        app:layout_constraintVertical_bias="0.0">
-
-        <ImageView
-            android:id="@+id/imageView13"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginLeft="15dp"
-            app:srcCompat="@drawable/fighter" />
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginLeft="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/accounName"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/linearLayout2"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Your Name Here"
-                android:textSize="16sp"
-                android:textStyle="italic" />
+                android:orientation="horizontal"
+                android:paddingTop="16dp"
+                app:layout_constraintVertical_bias="0.0">
 
-            <TextView
-                android:id="@+id/accountEmail"
+                <ImageView
+                    android:id="@+id/imageView13"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginLeft="15dp"
+                    app:srcCompat="@drawable/fighter" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/accounName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Your Name Here"
+                        android:textSize="16sp"
+                        android:textStyle="italic" />
+
+                    <TextView
+                        android:id="@+id/accountEmail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="your.email@email.com"
+                        android:textColor="#FF5858"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linearForms"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginRight="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="5dp"
+                app:layout_constraintVertical_bias="0.0">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/nameLayout"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:endIconDrawable="@drawable/edit"
+                    app:endIconMode="custom"
+                    app:endIconScaleType="center"
+                    app:startIconDrawable="@drawable/person">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/nameHere"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center|left"
+                        android:hint="Name"
+                        android:inputType="textPersonName" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/phoneLayout"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:endIconDrawable="@drawable/edit"
+                    app:endIconMode="custom"
+                    app:endIconScaleType="center"
+                    app:startIconDrawable="@drawable/phone">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/phoneHere"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center|left"
+                        android:hint="Phone Number"
+                        android:inputType="phone" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/addressLayout"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:endIconDrawable="@drawable/edit"
+                    app:endIconMode="custom"
+                    app:endIconScaleType="center"
+                    app:startIconDrawable="@drawable/address">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/addressHere"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:gravity="center|left"
+                        android:hint="Home Address"
+                        android:inputType="textPostalAddress" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/currentLocLayout"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:endIconDrawable="@drawable/edit"
+                    app:endIconMode="custom"
+                    app:endIconScaleType="center"
+                    app:startIconDrawable="@drawable/ic_baseline_my_location_24"
+                    app:startIconTint="#FFB4B4">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/currentLocHere"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center|left"
+                        android:hint="Your Current Location"
+                        android:inputType="textCapWords" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linearLayout3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="your.email@email.com"
-                android:textColor="#FF5858"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+                android:orientation="vertical"
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="20dp" >
+
+                <TextView
+                    android:id="@+id/chooseFromMap"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/border2"
+                    android:text="Choose From Map"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="#9C9C9C"
+                    android:layout_marginBottom="5dp"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/border2"
+                android:layout_marginRight="20dp"
+                android:layout_marginLeft="20dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="List of Places"
+                    android:textSize="12sp"
+                    android:textStyle="italic" />
+
+                <ListView
+                    android:id="@+id/listPlace"
+                    style="@style/Widget.AppCompat.ListView.DropDown"
+                    android:layout_width="match_parent"
+                    android:layout_height="180dp"
+                    android:scrollbars="vertical"
+                    android:smoothScrollbar="true"
+                    android:focusable="true">
+                </ListView>
+
+            </LinearLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginLeft="20dp"
+                    app:boxBackgroundColor="#FFFFFF"
+                    app:boxBackgroundMode="outline"
+                    app:boxCornerRadiusBottomEnd="10dp"
+                    app:boxCornerRadiusBottomStart="10dp"
+                    app:boxCornerRadiusTopEnd="10dp"
+                    app:boxCornerRadiusTopStart="10dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/commentBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="100dp"
+                        android:gravity="start|top"
+                        android:hint="comment/note"
+                        android:autoSizeMaxTextSize="18sp"
+                        android:autoSizeMinTextSize="12sp"
+                        android:autoSizeTextType="uniform"
+                        android:maxWidth="300dp"
+                        android:maxHeight="150dp"
+                        android:minHeight="100dp"
+                        android:minWidth="250dp"
+                        android:maxLines="5"
+                        android:inputType="textMultiLine"
+                        android:scrollbars="vertical"
+                        android:textSize="18sp"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right|center"
+                    android:layout_marginRight="30dp">
+
+                    <TextView
+                        android:id="@+id/textView9"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="SEND"
+                        android:textSize="8sp"
+                        android:textStyle="bold"
+                        android:textColor="#9E9E9E"
+                        android:layout_gravity="center"/>
+
+                    <ImageView
+                        android:id="@+id/sendButton"
+                        android:layout_width="70dp"
+                        android:layout_height="70dp"
+                        android:scaleType="fitXY"
+                        app:srcCompat="@drawable/firebutton"
+                        android:layout_gravity="center"
+                        app:tint="#EF6969" />
+
+                </FrameLayout>
+
+            </FrameLayout>
 
         </LinearLayout>
 
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:id="@+id/linearForms"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginRight="20dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="5dp"
-        app:layout_constraintVertical_bias="0.0">
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/nameLayout"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:endIconDrawable="@drawable/edit"
-            app:endIconMode="custom"
-            app:endIconScaleType="center"
-            app:startIconDrawable="@drawable/person">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/nameHere"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center|left"
-                android:hint="Name"
-                android:inputType="textPersonName" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/phoneLayout"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:endIconDrawable="@drawable/edit"
-            app:endIconMode="custom"
-            app:endIconScaleType="center"
-            app:startIconDrawable="@drawable/phone">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/phoneHere"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center|left"
-                android:hint="Phone Number"
-                android:inputType="phone" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/addressLayout"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:endIconDrawable="@drawable/edit"
-            app:endIconMode="custom"
-            app:endIconScaleType="center"
-            app:startIconDrawable="@drawable/address">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/addressHere"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:gravity="center|left"
-                android:hint="Home Address"
-                android:inputType="textPostalAddress" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/currentLocLayout"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:endIconDrawable="@drawable/edit"
-            app:endIconMode="custom"
-            app:endIconScaleType="center"
-            app:startIconDrawable="@drawable/ic_baseline_my_location_24"
-            app:startIconTint="#FFB4B4">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/currentLocHere"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center|left"
-                android:hint="Your Current Location"
-                android:inputType="textCapWords" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-    </LinearLayout>
-
-    <ListView
-        android:id="@+id/list_route_suggest"
-        style="@style/Widget.AppCompat.ListView.DropDown"
-        android:layout_width="match_parent"
-        android:layout_height="120dp"
-        android:layout_margin="5dp"
-        android:scrollbars="vertical"
-        android:smoothScrollbar="true" >
-
-    </ListView>
-
-    <LinearLayout
-        android:id="@+id/linearLayout3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="10dp">
-
-        <TextView
-            android:id="@+id/chooseFromMap"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/border"
-            android:text="Choose from map"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-    </LinearLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout6"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_margin="10dp">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/commentClick"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:ems="10"
-            android:focusable="false"
-            android:gravity="start|top"
-            android:hint="comment/note"
-            android:inputType="textMultiLine"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="parent" />
-
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="15dp">
-
-        <TextView
-            android:id="@+id/textView9"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="SEND"
-            android:textSize="10sp"
-            android:textStyle="bold"
-            android:textColor="#9E9E9E"
-            android:layout_gravity="center"/>
-
-        <ImageView
-            android:id="@+id/sendButton"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_gravity="center"
-            android:scaleType="fitXY"
-            app:srcCompat="@drawable/firebutton"
-            app:tint="#EF6969" />
-
-    </FrameLayout>
-
-
+    </androidx.core.widget.NestedScrollView>
 
 </LinearLayout>

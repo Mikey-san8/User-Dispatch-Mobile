@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/searchSheet"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    app:behavior_peekHeight="0dp"
+    android:fitsSystemWindows="true"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp">
+
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Suggestions"
+            android:textSize="16sp"
+            android:textColor="#C5C5C5"
+            android:textStyle="italic"/>
+
+    </LinearLayout>
+
+    <ListView
+        android:background="#FFFFFF"
+        android:id="@+id/listSearch"
+        style="@style/Widget.AppCompat.ListView.DropDown"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="vertical"
+        android:smoothScrollbar="true">
+    </ListView>
+
+</LinearLayout>

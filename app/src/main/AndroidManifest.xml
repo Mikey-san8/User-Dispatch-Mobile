@@ -19,9 +19,8 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/fighter"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.DISPATCHMAIN"
         tools:targetApi="31">
@@ -61,7 +60,8 @@
         </activity>
         <activity
             android:name=".MainActivity"
-            android:exported="false">
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
@@ -77,7 +77,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyAiUifoknEDWoQNPpUZ9FZatGcD3Mbd1_o" />
+            android:value="AIzaSyDKHY_L76RS3qMCyDSctItyGycxGAwBK8U" />
     </application>
 
 </manifest>

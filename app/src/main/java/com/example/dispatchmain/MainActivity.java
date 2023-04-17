@@ -1,46 +1,22 @@
 package com.example.dispatchmain;
 
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.Manifest;
-import android.animation.ObjectAnimator;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.location.Location;
-import android.location.LocationManager;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Looper;
-import android.provider.Settings;
-import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.MediaController;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MapStyleOptions;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -50,17 +26,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.maps.GeoApiContext;
-import com.karumi.dexter.Dexter;
-import com.karumi.dexter.PermissionToken;
-import com.karumi.dexter.listener.PermissionDeniedResponse;
-import com.karumi.dexter.listener.PermissionGrantedResponse;
-import com.karumi.dexter.listener.PermissionRequest;
-import com.karumi.dexter.listener.single.PermissionListener;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 @SuppressWarnings("ALL")
 public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener,
@@ -75,6 +40,8 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
     BottomNavigationView bottomNavigationView;
 
+    private MapFragment mFragment;
+
     public View headerView;
 
     private DrawerLayout drawerLayout;
@@ -82,6 +49,8 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
     public TextView drawerN,
                     drawerE;
+
+    private boolean doubleBackToExitPressedOnce = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -103,6 +72,9 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
     public void mainEvents()
     {
+        FragmentManager mFrag = getSupportFragmentManager();
+        mFragment = (MapFragment) mFrag.findFragmentByTag("MapFragment");
+
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
 
@@ -179,9 +151,11 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 dialog.cancel();
             }
         });
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener()
+        {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
+            public void onClick(DialogInterface dialog, int which)
+            {
 
                 FirebaseAuth.getInstance().signOut();
                 Intent intent = new Intent(MainActivity.this, Login.class);
@@ -195,7 +169,6 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         });
         AlertDialog dialog = builder.create();
         dialog.show();
-
     }
 
     public void userDetails()
@@ -252,11 +225,49 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
     }
 
+    private void exit()
+    {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Are you sure you want to exit?");
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+        {
+            @Override
+            public void onClick(DialogInterface dialog, int which)
+            {
+                dialog.cancel();
+            }
+        });
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which)
+            {
+                System.exit(0);
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
     @Override
     public void onBackPressed()
     {
-        super.onBackPressed();
+        if (doubleBackToExitPressedOnce)
+        {
+            System.exit(0);
+            return;
+        }
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                doubleBackToExitPressedOnce = false;
+            }
+        }, 2000);
     }
-
-
 }
