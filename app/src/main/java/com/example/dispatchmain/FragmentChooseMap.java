@@ -1,11 +1,9 @@
 package com.example.dispatchmain;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -17,6 +15,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -32,6 +35,7 @@ import java.util.Locale;
 @SuppressWarnings("ALL")
 public class FragmentChooseMap extends Fragment implements OnMapReadyCallback {
 
+    private FusedLocationProviderClient locationClient;
     private GoogleMap mGoogleMap;
     private Geocoder geocoder;
     private Marker draggedMarker;
@@ -46,12 +50,21 @@ public class FragmentChooseMap extends Fragment implements OnMapReadyCallback {
 
     View choose;
 
+    SupportMapFragment mapFragment;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        locationClient = LocationServices.getFusedLocationProviderClient(getActivity());
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         choose = inflater.inflate(R.layout.fragment_choosemap, container, false);
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapChoose);
+        mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapChoose);
         mapFragment.getMapAsync(this);
 
         geocoder = new Geocoder(requireContext(), Locale.getDefault());
@@ -95,15 +108,18 @@ public class FragmentChooseMap extends Fragment implements OnMapReadyCallback {
 
     private void enableMyLocation()
     {
-        LocationManager locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
-        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        if (location != null)
-        {
-            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-            draggedMarker = mGoogleMap.addMarker(new MarkerOptions().position(latLng).draggable(true));
-            previousMarkerPosition = latLng;
-            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
-        }
+        locationClient.getLastLocation().addOnCompleteListener(task -> {
+
+            if (task.isSuccessful())
+            {
+                Location location = task.getResult();
+
+                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                draggedMarker = mGoogleMap.addMarker(new MarkerOptions().position(latLng).draggable(true));
+                previousMarkerPosition = latLng;
+                mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
+            }
+        });
     }
 
     private void getAddressFromLocation(double latitude, double longitude)
@@ -145,6 +161,45 @@ public class FragmentChooseMap extends Fragment implements OnMapReadyCallback {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private final LocationCallback locationCallback = new LocationCallback()
+    {
+        @Override
+        public void onLocationResult(LocationResult locationResult)
+        {
+            if(mGoogleMap != null)
+            {
+                Location location = locationResult.getLastLocation();
+
+            }
+        }
+    };
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        if (mapFragment != null)
+        {
+            mapFragment.onResume();
+            LocationRequest locationRequest = LocationRequest.create()
+                    .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                    .setInterval(10000)
+                    .setFastestInterval(5000);
+            locationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+        }
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        if (mapFragment != null)
+        {
+            mapFragment.onPause();
+            locationClient.removeLocationUpdates(locationCallback);
         }
     }
 }
