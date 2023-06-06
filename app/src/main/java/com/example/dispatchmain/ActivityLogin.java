@@ -4,11 +4,13 @@ package com.example.dispatchmain;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -30,7 +32,7 @@ import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 
 @SuppressWarnings("ALL")
-public class Login extends AppCompatActivity {
+public class ActivityLogin extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     ConstraintLayout login_screen_tap;
@@ -78,12 +80,22 @@ public class Login extends AppCompatActivity {
             }
         });
         login_screen_tap = findViewById(R.id.login_tap_screen);
-        login_screen_tap.setOnClickListener(new View.OnClickListener()
-        {
+        login_screen_tap.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View view)
+            public boolean onTouch(View v, MotionEvent event)
             {
-                hideKeyboard(view);
+                View view = getCurrentFocus();
+                if (view != null)
+                {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+
+                    if (imm != null)
+                    {
+                        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                    }
+                }
+
+                return false;
             }
         });
     }
@@ -126,7 +138,7 @@ public class Login extends AppCompatActivity {
                     }
                     else
                     {
-                        Toast.makeText(Login.this, "Password & Email Unmatched",
+                        Toast.makeText(ActivityLogin.this, "Password & Email Unmatched",
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -134,14 +146,14 @@ public class Login extends AppCompatActivity {
 
     private void showMainActivity()
     {
-       Intent main = new Intent(this, MainActivity.class);
+       Intent main = new Intent(this, ActivityMain.class);
        startActivity(main);
        finish();
     }
 
     private void switchToRegister()
     {
-        Intent intent = new Intent(this, Register.class);
+        Intent intent = new Intent(this, ActivityRegister.class);
         startActivity(intent);
         finish();
     }
@@ -169,7 +181,7 @@ public class Login extends AppCompatActivity {
             @Override
             public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse)
             {
-                Toast.makeText(Login.this, "Permission Granted", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ActivityLogin.this, "Permission Granted", Toast.LENGTH_SHORT).show();
                 isPermissionGranted = true;
             }
 

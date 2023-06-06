@@ -6,42 +6,37 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.InputFilter;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.HashMap;
-import java.util.Map;
-
-public class Register extends AppCompatActivity{
-
+@SuppressWarnings("ALL")
+public class ActivityRegister extends AppCompatActivity
+{
     FirebaseAuth auth = FirebaseAuth.getInstance();
     FirebaseUser currentUser = auth.getCurrentUser();
 
-    ConstraintLayout register_tap_screen;
-
     private DatabaseReference mDatabase;
 
-    String userId;
+    private boolean checkPassword;
+
+    private String userId;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
@@ -63,7 +58,8 @@ public class Register extends AppCompatActivity{
         ImageView SwitchToLogin = findViewById(R.id.BackToLogin);
         SwitchToLogin.setOnClickListener(view -> switchToLogin());
 
-        register_tap_screen = findViewById(R.id.register_tap_screen);
+        RelativeLayout register_tap_screen = findViewById(R.id.register_tap_screen);
+
         register_tap_screen.setOnClickListener(view -> {
             InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
             inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
@@ -88,21 +84,31 @@ public class Register extends AppCompatActivity{
         String phone = typePhoneNumber.getText().toString();
         String address = typeAddress.getText().toString();
 
+        InputFilter[] filters = new InputFilter[]{
+                new MaxLengthFilter(10)
+        };
+        typePhoneNumber.setFilters(filters);
+
         if (firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || password.isEmpty() || confirm.isEmpty() || phone.isEmpty() || address.isEmpty())
         {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_LONG).show();
         }
         else
         {
-            if(!password.equals(confirm))
+            if(!isPasswordValid(password))
             {
-                Toast.makeText(Register.this, "Password Unmatched ", Toast.LENGTH_SHORT).show();
+                TextView textPassword = findViewById(R.id.passwordText);
+                textPassword.setTextColor(Color.RED);
+                String passInvalid = "Password Invalid";
+                Toast.makeText(this, passInvalid, Toast.LENGTH_SHORT).show();
+            }
+            else if(!password.equals(confirm))
+            {
+                Toast.makeText(ActivityRegister.this, "Password Unmatched ", Toast.LENGTH_SHORT).show();
                 typeRegisterPassword.setTextColor(Color.RED);
                 typeConfirmPassword.setTextColor(Color.RED);
             }
-
             else
-
             {
                 auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task ->
                 {
@@ -113,24 +119,46 @@ public class Register extends AppCompatActivity{
                         mDatabase = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference();
                         User user = new User(firstName, lastName, email, address, phone, password, userId, userName);
                         mDatabase.child("Users").child(userId).setValue(user)
-                                .addOnSuccessListener(aVoid -> Toast.makeText(Register.this, "Success", Toast.LENGTH_SHORT).show())
-                                .addOnFailureListener(e -> Toast.makeText(Register.this, "Registration Failed", Toast.LENGTH_SHORT).show());
+                                .addOnSuccessListener(aVoid -> Toast.makeText(ActivityRegister.this, "Success", Toast.LENGTH_SHORT).show())
+                                .addOnFailureListener(e -> Toast.makeText(ActivityRegister.this, "Registration Failed", Toast.LENGTH_SHORT).show());
                         logoutUser();
                     }
                     else
                     {
-                        Toast.makeText(Register.this, "Registration Failed" + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ActivityRegister.this, "Registration Failed" + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
 
             }
         }
     }
-    private void switchToLogin() {
-        Intent intent = new Intent(this, Login.class); startActivity(intent); finish();
+
+    public boolean isPasswordValid(String password)
+    {
+        if (password.length() < 7) {
+            return false;
+        }
+
+        if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*")) {
+            return false;
+        }
+
+        if (!password.matches(".*[A-Z].*") || !password.matches(".*[a-z].*")) {
+            return false;
+        }
+
+        return true;
     }
 
-    private void logoutUser() {
-        FirebaseAuth.getInstance().signOut(); Intent intent = new Intent(this, Login.class); startActivity(intent); finish();
+
+
+    private void switchToLogin()
+    {
+        Intent intent = new Intent(this, ActivityLogin.class); startActivity(intent); finish();
+    }
+
+    private void logoutUser()
+    {
+        FirebaseAuth.getInstance().signOut(); Intent intent = new Intent(this, ActivityLogin.class); startActivity(intent); finish();
     }
 }

@@ -19,12 +19,18 @@
         app:srcCompat="@drawable/remove"
         app:tint="#7A4646" />
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/chooseMap">
+
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true">
 
         <LinearLayout
+            android:id="@+id/linearFrame"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -34,13 +40,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingTop="16dp"
+                android:paddingTop="5dp"
                 app:layout_constraintVertical_bias="0.0">
 
                 <ImageView
                     android:id="@+id/imageView13"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
                     android:layout_marginLeft="15dp"
                     app:srcCompat="@drawable/fighter" />
 
@@ -56,7 +62,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Your Name Here"
-                        android:textSize="16sp"
+                        android:textSize="10sp"
                         android:textStyle="italic" />
 
                     <TextView
@@ -65,12 +71,23 @@
                         android:layout_height="wrap_content"
                         android:text="your.email@email.com"
                         android:textColor="#FF5858"
-                        android:textSize="14sp"
+                        android:textSize="10sp"
                         android:textStyle="bold" />
 
                 </LinearLayout>
 
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/textView14"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="5dp"
+                android:textSize="12sp"
+                android:textColor="#919191"
+                android:textStyle="italic"
+                android:text="Personal details are retrieved from registration." />
 
             <LinearLayout
                 android:id="@+id/linearForms"
@@ -98,6 +115,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center|left"
                         android:hint="Name"
+                        android:textSize="10sp"
                         android:inputType="textPersonName" />
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -117,6 +135,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center|left"
                         android:hint="Phone Number"
+                        android:textSize="10sp"
                         android:inputType="phone" />
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -137,6 +156,7 @@
                         android:ellipsize="end"
                         android:gravity="center|left"
                         android:hint="Home Address"
+                        android:textSize="10sp"
                         android:inputType="textPostalAddress" />
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -157,10 +177,12 @@
                         android:layout_height="wrap_content"
                         android:gravity="center|left"
                         android:hint="Your Current Location"
+                        android:textSize="10sp"
                         android:inputType="textCapWords" />
                 </com.google.android.material.textfield.TextInputLayout>
 
             </LinearLayout>
+
 
             <LinearLayout
                 android:id="@+id/linearLayout3"
@@ -168,117 +190,124 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginTop="5dp"
-                android:layout_marginLeft="20dp" >
+                android:layout_marginLeft="20dp">
 
                 <TextView
                     android:id="@+id/chooseFromMap"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/border2"
-                    android:text="Choose From Map"
+                    android:text="Choose from map"
                     android:textStyle="bold"
-                    android:textSize="16sp"
+                    android:textSize="10sp"
                     android:textColor="#9C9C9C"
                     android:layout_marginBottom="5dp"/>
 
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/border2"
-                android:layout_marginRight="20dp"
-                android:layout_marginLeft="20dp"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="List of Places"
-                    android:textSize="12sp"
-                    android:textStyle="italic" />
+                android:text="List of Places"
+                android:textSize="10sp"
+                android:textStyle="italic"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"/>
 
                 <ListView
                     android:id="@+id/listPlace"
                     style="@style/Widget.AppCompat.ListView.DropDown"
                     android:layout_width="match_parent"
-                    android:layout_height="180dp"
+                    android:layout_height="200dp"
                     android:scrollbars="vertical"
                     android:smoothScrollbar="true"
-                    android:focusable="true">
+                    android:nestedScrollingEnabled="true"
+                    android:background="@drawable/border2"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp">
                 </ListView>
 
-            </LinearLayout>
+            <TextView
+                android:id="@+id/textView16"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:textColor="#919191"
+                android:textStyle="italic"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_margin="5dp"
+                android:text="You may add comment or note for the responder.\nMake sure to send your information." />
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp">
+                android:layout_height="match_parent"
+                android:layout_marginBottom="5dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp">
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/textInputLayout6"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="left"
-                    android:layout_marginLeft="20dp"
-                    app:boxBackgroundColor="#FFFFFF"
-                    app:boxBackgroundMode="outline"
-                    app:boxCornerRadiusBottomEnd="10dp"
-                    app:boxCornerRadiusBottomStart="10dp"
-                    app:boxCornerRadiusTopEnd="10dp"
-                    app:boxCornerRadiusTopStart="10dp">
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/commentBox"
-                        android:layout_width="wrap_content"
-                        android:layout_height="100dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:gravity="start|top"
                         android:hint="comment/note"
                         android:autoSizeMaxTextSize="18sp"
                         android:autoSizeMinTextSize="12sp"
                         android:autoSizeTextType="uniform"
-                        android:maxWidth="300dp"
-                        android:maxHeight="150dp"
-                        android:minHeight="100dp"
-                        android:minWidth="250dp"
                         android:maxLines="5"
                         android:inputType="textMultiLine"
                         android:scrollbars="vertical"
-                        android:textSize="18sp"/>
+                        android:textSize="10sp"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <FrameLayout
+                <androidx.cardview.widget.CardView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right|center"
-                    android:layout_marginRight="30dp">
+                    app:cardCornerRadius="30dp"
+                    android:layout_marginEnd="10dp">
 
-                    <TextView
-                        android:id="@+id/textView9"
+                    <FrameLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="SEND"
-                        android:textSize="8sp"
-                        android:textStyle="bold"
-                        android:textColor="#9E9E9E"
-                        android:layout_gravity="center"/>
+                        android:layout_height="wrap_content">
 
-                    <ImageView
-                        android:id="@+id/sendButton"
-                        android:layout_width="70dp"
-                        android:layout_height="70dp"
-                        android:scaleType="fitXY"
-                        app:srcCompat="@drawable/firebutton"
-                        android:layout_gravity="center"
-                        app:tint="#EF6969" />
+                        <TextView
+                            android:id="@+id/textView9"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="SEND"
+                            android:textSize="7sp"
+                            android:textStyle="bold"
+                            android:textColor="#9E9E9E"
+                            android:layout_gravity="center"/>
 
-                </FrameLayout>
+                        <ImageView
+                            android:id="@+id/sendButton"
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
+                            android:scaleType="fitXY"
+                            app:srcCompat="@drawable/firebutton"
+                            android:layout_gravity="center"
+                            app:tint="#EF6969" />
+
+                    </FrameLayout>
+
+                </androidx.cardview.widget.CardView>
 
             </FrameLayout>
 
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
+
+    </FrameLayout>
 
 </LinearLayout>

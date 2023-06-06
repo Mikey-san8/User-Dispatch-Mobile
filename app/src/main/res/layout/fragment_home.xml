@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".ActivityMain">
 
     <LinearLayout
         android:id="@+id/linearMainLayout"
@@ -48,12 +49,9 @@
                 android:layout_height="wrap_content"
                 android:text="Check Profile"
                 android:textColor="#FF5858"
-                android:textSize="15sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
-
-
         </LinearLayout>
-
 
     </LinearLayout>
 
@@ -100,16 +98,16 @@
         app:srcCompat="@drawable/circle_button"
         app:tint="#FBCDCD" />
 
-        <ImageView
-            android:id="@+id/fire_btn2"
-            android:layout_width="90dp"
-            android:layout_height="90dp"
-            app:srcCompat="@drawable/circle_button"
-            app:tint="#FF7272"
-            app:layout_constraintBottom_toBottomOf="@+id/blink_btn"
-            app:layout_constraintEnd_toEndOf="@+id/blink_btn"
-            app:layout_constraintStart_toStartOf="@+id/blink_btn"
-            app:layout_constraintTop_toTopOf="@+id/blink_btn" />
+    <ImageView
+        android:id="@+id/fire_btn2"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
+        app:srcCompat="@drawable/circle_button"
+        app:tint="#FF7272"
+        app:layout_constraintBottom_toBottomOf="@+id/blink_btn"
+        app:layout_constraintEnd_toEndOf="@+id/blink_btn"
+        app:layout_constraintStart_toStartOf="@+id/blink_btn"
+        app:layout_constraintTop_toTopOf="@+id/blink_btn"/>
 
     <TextView
         android:id="@+id/textView3"
@@ -142,13 +140,16 @@
         android:id="@+id/linearLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="right|bottom"
+        android:layout_marginBottom="10dp"
         android:background="@drawable/border2"
+        android:gravity="center"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.49"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/call911"
-        app:layout_constraintVertical_bias="0.153">
+        app:layout_constraintTop_toBottomOf="@+id/textView11"
+        app:layout_constraintVertical_bias="1.0">
 
         <ImageView
             android:layout_width="25dp"
@@ -160,7 +161,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
             android:orientation="vertical">
 
             <TextView
@@ -185,6 +186,44 @@
                 android:textStyle="bold" />
 
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|right"
+            android:layout_marginStart="20dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textResponders"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawablePadding="3dp"
+                android:ellipsize="end"
+                android:lines="1"
+                android:text="Responder/s: ..."
+                android:textColor="#505050"
+                android:textSize="12sp"
+                android:textStyle="italic" />
+
+            <TextView
+                android:id="@+id/checkOnMap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Check On Map"
+                android:textColor="#FF5858"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/respondCheck"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_gravity="center|right"
+            android:layout_marginStart="10dp"
+            app:srcCompat="@drawable/responder" />
 
     </LinearLayout>
 
@@ -235,18 +274,24 @@
 
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/call911"
-        android:layout_width="55dp"
-        android:layout_height="55dp"
-        android:scaleType="center"
-        app:srcCompat="@drawable/ic_baseline_call_24"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView7"
-        app:layout_constraintVertical_bias="0.102"
-        android:background="@drawable/shape_for_call"/>
+        app:layout_constraintVertical_bias="0.102">
+
+        <ImageView
+            android:id="@+id/call911"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:scaleType="center"
+            app:srcCompat="@drawable/ic_baseline_call_24" />
+    </androidx.cardview.widget.CardView>
 
     <TextView
         android:id="@+id/textView7"
@@ -261,58 +306,6 @@
         app:layout_constraintTop_toBottomOf="@+id/textView8"
         app:layout_constraintVertical_bias="0.045" />
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_marginBottom="5dp"
-        android:background="@drawable/border2"
-        android:gravity="bottom"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
-        app:layout_constraintVertical_bias="1.0">
-
-        <ImageView
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_gravity="center"
-            app:srcCompat="@drawable/responder" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginLeft="10dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/textResponders"
-                android:layout_width="95dp"
-                android:layout_height="wrap_content"
-                android:drawablePadding="3dp"
-                android:ellipsize="end"
-                android:lines="1"
-                android:text="Responder/s: ..."
-                android:textColor="#505050"
-                android:textSize="12sp"
-                android:textStyle="italic" />
-
-            <TextView
-                android:id="@+id/checkOnMap"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Check On Map"
-                android:textColor="#FF5858"
-                android:textSize="10sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
     <ImageView
         android:id="@+id/rescue"
         android:layout_width="55dp"
@@ -325,7 +318,42 @@
         app:layout_constraintVertical_bias="0.017"
         app:srcCompat="@drawable/rescue" />
 
-        <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <TextView
+        android:id="@+id/textView11"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Firefighters never die,
+        \nthey just burn forever in the hearts of the people
+        \nwhose lives they saved.
+        \n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t- Susan Murphree"
+        android:textSize="11dp"
+        android:textStyle="italic"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.503"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardView"
+        app:layout_constraintVertical_bias="0.189"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/textView15"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="This application sends location\nof incident reports by a user\nfor firefighters to respond."
+        android:textColor="#939393"
+        android:textSize="11sp"
+        android:textStyle="italic"
+        app:layout_constraintBottom_toTopOf="@+id/linearResponder"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.681"
+        app:layout_constraintStart_toEndOf="@+id/linearMainLayout"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.516" />
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:id="@+id/coordinatorLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -336,9 +364,8 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0">
 
-            <include layout="@layout/btmfire" />
+            <include layout="@layout/bottom_emergency" />
 
-        </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

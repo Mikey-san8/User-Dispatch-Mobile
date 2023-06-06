@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".ActivityMain">
 
     <ImageView
         android:id="@+id/recordClose"
@@ -251,7 +251,7 @@
     android:layout_gravity="bottom">
 
     <ImageView
-        android:id="@+id/Logo_demo"
+        android:id="@+id/infoGotoMap"
         android:layout_width="100dp"
         android:layout_height="100dp"
         app:srcCompat="@drawable/logo_splash"
@@ -261,7 +261,7 @@
         app:tint="#A16767" />
 
     <ImageView
-        android:id="@+id/logo_demo"
+        android:id="@+id/infoGotoMap2"
         android:layout_width="100dp"
         android:layout_height="100dp"
         app:srcCompat="@drawable/logo_splash"

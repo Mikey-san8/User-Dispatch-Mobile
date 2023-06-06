@@ -5,15 +5,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/maphere"
-    tools:context=".MainActivity">
+    tools:context=".ActivityMain">
 
-        <fragment
-            android:id="@+id/mapFragment"
+        <FrameLayout
+            android:id="@+id/FrameMap"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:layout="@layout/map_view_fragment"
-            class="com.google.android.gms.maps.SupportMapFragment"
-            android:layout_alignWithParentIfMissing="true"/>
+            android:layout_height="match_parent">
+                <fragment
+                    android:id="@+id/mapFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    tools:layout="@layout/fragment_map_view"
+                    class="com.google.android.gms.maps.SupportMapFragment"
+                    android:layout_alignWithParentIfMissing="true"/>
+        </FrameLayout>
 
         <ImageView
             android:id="@+id/currentLocation"
@@ -82,7 +87,7 @@
                             android:drawablePadding="3dp"
                             android:ellipsize="end"
                             android:lines="1"
-                            android:text="Fire Stations Nearby: 5"
+                            android:text="Fire Stations Nearby: ..."
                             android:textColor="#505050"
                             android:textSize="12sp"
                             android:textStyle="italic" />
@@ -91,7 +96,7 @@
                             android:id="@+id/findStations"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Find Fire Stations"
+                            android:text="See Fire Stations"
                             android:textColor="#FF5858"
                             android:textSize="10sp"
                             android:textStyle="bold" />
@@ -130,13 +135,13 @@
                             android:drawablePadding="3dp"
                             android:ellipsize="end"
                             android:lines="1"
-                            android:text="Responder/s: 5"
+                            android:text="Responder/s: ..."
                             android:textColor="#505050"
                             android:textSize="12sp"
                             android:textStyle="italic" />
 
                         <TextView
-                            android:id="@+id/checkResponders"
+                            android:id="@+id/seeResponders"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="See List"
@@ -155,7 +160,8 @@
             android:layout_marginTop="5dp"
             android:layout_below="@+id/linearFindStation">
 
-                <include layout="@layout/btmsearch" />
+                <include layout="@layout/bottom_search" />
+                <include layout="@layout/bottom_responders"/>
 
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

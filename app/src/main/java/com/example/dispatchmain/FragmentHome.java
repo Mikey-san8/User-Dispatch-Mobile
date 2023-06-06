@@ -10,15 +10,21 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.speech.tts.TextToSpeech;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -30,8 +36,11 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -40,8 +49,12 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.AutocompletePrediction;
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.PlaceLikelihood;
+import com.google.android.libraries.places.api.model.RectangularBounds;
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -54,9 +67,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -70,9 +80,9 @@ import java.util.Locale;
 import java.util.Map;
 
 @SuppressWarnings("ALL")
-public class MainFragment extends Fragment implements View.OnClickListener, AdapterView.OnItemClickListener
+public class FragmentHome extends Fragment implements View.OnClickListener, AdapterView.OnItemClickListener, View.OnTouchListener
 {
-    public String API_KEY = "AIzaSyDKHY_L76RS3qMCyDSctItyGycxGAwBK8U";
+    public String API_KEY = "AIzaSyDKmNOWX9-j1NyReDFb6-5R9P2wdIKJvyg";
 
     public View main;
 
@@ -92,8 +102,10 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
                         blinkBtn2,
                         blinkBtn3;
 
-    private BottomSheetBehavior bottoSheetCall;
-    private View bottomSheetView;
+    private CardView callButton;
+
+    public BottomSheetBehavior bottomSheetCall;
+    public View bottomSheetView;
 
     LinearLayout    fireCallSheet,
                     linearMainLayout,
@@ -115,6 +127,7 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
                     accountE,
                     textCurrent,
                     textAvailable,
+                    textResponders,
                     helloName;
 
     public ListView placeList;
@@ -129,10 +142,11 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
 
     Boolean stop = false;
 
-    private int counter;
-    private int count;
+    ValueEventListener valueEventListener;
 
-    public MainFragment()
+    TextToSpeech textToSpeech;
+
+    public FragmentHome()
     {
 
     }
@@ -154,8 +168,20 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        main = inflater.inflate(R.layout.main, container, false);
+        main = inflater.inflate(R.layout.fragment_home, container, false);
 
+        textToSpeech = new TextToSpeech(getActivity(), new TextToSpeech.OnInitListener()
+        {
+            @Override
+            public void onInit(int status) {
+                if (status != TextToSpeech.ERROR)
+                {
+                    textToSpeech.setLanguage(Locale.UK);
+                }
+            }
+        });
+
+        showFirstDialog();
 
         setEvents();
         userDetails();
@@ -181,35 +207,22 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
     public void placeName(Context context, double latitude, double longitude, String holder)
     {
         List<Place.Field> placeFields = Arrays.asList(Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG);
-
-        // Create a request object for the place details
         FindCurrentPlaceRequest request = FindCurrentPlaceRequest.builder(placeFields).build();
-
-        // Use the Places API client to get the place details
         Task<FindCurrentPlaceResponse> placeResponse = placesClient.findCurrentPlace(request);
-
-        // Add a listener to handle the response from the Places API
-
         String list = "list";
 
         ((Task<?>) placeResponse).addOnCompleteListener(task ->
         {
             if (task.isSuccessful())
             {
-                // Get the list of places returned by the Places API
                 FindCurrentPlaceResponse response = (FindCurrentPlaceResponse) task.getResult();
                 List<PlaceLikelihood> placeLikelihoods = response.getPlaceLikelihoods();
 
                 if (placeLikelihoods != null && !placeLikelihoods.isEmpty())
                 {
-                    // Get the most likely place from the list
                     Place place = placeLikelihoods.get(0).getPlace();
-
-                    // Use the place details to get the name and address
                     String name = place.getName();
                     String address = place.getAddress();
-
-                    // Use the latitude and longitude from the place details to verify accuracy
                     LatLng placeLatLng = place.getLatLng();
                     LatLng location = new LatLng(latitude, longitude);
 
@@ -242,10 +255,10 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
             }
             else
             {
-                // Handle errors from the Places API
                 Exception exception = task.getException();
                 if (exception != null)
                 {
+
                 }
             }
         });
@@ -312,6 +325,7 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
         super.onPause();
 
         fusedLocationClient.removeLocationUpdates(locationCallback);
+
     }
 
     @Override
@@ -329,10 +343,13 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
     {
         endIcon();
 
+        callButton = main.findViewById(R.id.cardView);
+
         userN = main.findViewById(R.id.nameHere);
         userP = main.findViewById(R.id.phoneHere);
         userA = main.findViewById(R.id.addressHere);
         userL = main.findViewById(R.id.currentLocHere);
+        whenTyping();
         userC = main.findViewById(R.id.commentBox);
 
         accountN = main.findViewById(R.id.accounName);
@@ -346,43 +363,75 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
         blinkBtn3.setOnClickListener(this);
 
         textAvailable = main.findViewById(R.id.textAvailable);
+        textResponders = main.findViewById(R.id.textResponders);
 
         helloName = main.findViewById(R.id.helloName);
 
         main.findViewById(R.id.sendButton).setOnClickListener(this);
         main.findViewById(R.id.checkOnMap).setOnClickListener(this);
         main.findViewById(R.id.seeLocation).setOnClickListener(this);
+        main.findViewById(R.id.cardView).setOnClickListener(this);
+        main.findViewById(R.id.respondCheck).setOnClickListener(this);
+        main.findViewById(R.id.checkDirectories).setOnClickListener(this);
+        main.findViewById(R.id.chooseFromMap).setOnClickListener(this);
 
         linearMainLayout = main.findViewById(R.id.linearMainLayout);
         linearResponder = main.findViewById(R.id.linearResponder);
         linearForms = main.findViewById(R.id.linearForms);
 
         bottomSheetView = main.findViewById(R.id.fireCallSheet);
-        bottoSheetCall = BottomSheetBehavior.from(bottomSheetView);
+        bottomSheetCall = BottomSheetBehavior.from(bottomSheetView);
 
         placeList = main.findViewById(R.id.listPlace);
 
-        pArray = new ArrayList<>();
+        placeList.setOnScrollListener(new AbsListView.OnScrollListener()
+        {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState)
+            {
+                if(scrollState == SCROLL_STATE_TOUCH_SCROLL)
+                {
+                    bottomSheetCall.setDraggable(false);
+                }
+                else
+                {
+                    bottomSheetCall.setDraggable(true);
+                }
+            }
 
-        pAdapter = new ArrayAdapter<>(getContext(), R.layout.place_list, R.id.placeList, pArray);
-
-        placeList.setAdapter(pAdapter);
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
+            {
+                if(firstVisibleItem == 0)
+                {
+                    bottomSheetCall.setDraggable(true);
+                }
+            }
+        });
 
         placeList.setOnItemClickListener(this);
 
-        bottoSheetCall.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback()
+        pArray = new ArrayList<>();
+
+        pAdapter = new ArrayAdapter<>(getContext(), R.layout.list_place, R.id.placeList, pArray);
+
+        placeList.setAdapter(pAdapter);
+
+        bottomSheetCall.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback()
         {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState)
             {
-                switch (newState) {
+                switch (newState)
+                {
                     case BottomSheetBehavior.STATE_HIDDEN:
 
                         break;
                     case BottomSheetBehavior.STATE_EXPANDED:
                     {
-                        linearMainLayout.setVisibility(View.INVISIBLE);
+                        callButton.setVisibility(View.INVISIBLE);
                         linearResponder.setVisibility(View.INVISIBLE);
+                        linearMainLayout.setVisibility(View.INVISIBLE);
                     }
                     break;
                     case BottomSheetBehavior.STATE_DRAGGING:
@@ -404,8 +453,9 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
                         userA.clearFocus();
                         userL.clearFocus();
 
-                        linearMainLayout.setVisibility(View.VISIBLE);
+                        callButton.setVisibility(View.VISIBLE);
                         linearResponder.setVisibility(View.VISIBLE);
+                        linearMainLayout.setVisibility(View.VISIBLE);
 
                         hideKeyboard(bottomSheet);
                     }
@@ -416,8 +466,9 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset)
             {
-                linearMainLayout.setVisibility(View.INVISIBLE);
+                callButton.setVisibility(View.INVISIBLE);
                 linearResponder.setVisibility(View.INVISIBLE);
+                linearMainLayout.setVisibility(View.INVISIBLE);
             }
         });
     }
@@ -473,42 +524,16 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
                 String placeClick = (String) parent.getAdapter().getItem(position);
 
                 userL.setText(placeClick);
-
-                onClickItem(parent, view, position, id);
-
                 break;
         }
-    }
-
-    public void onClickItem(AdapterView<?> adapterView, View view, int i, long l)
-    {
-        String invoke = adapterView.getAdapter().getItem(i).toString();
-
-        Geocoder geocoder = new Geocoder(main.getContext());
-
-        List<Address> addressList = null;
-
-        try
-        {
-            addressList = geocoder.getFromLocationName(invoke, 1);
-
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        Address address = addressList.get(0);
-        LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-
-        String holder = "list";
-        getPlaceName(main.getContext(), latLng, holder);
     }
 
     @Override
     public void onClick(View v)
     {
         Fragment fragment;
+
+        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
 
         String navigation;
 
@@ -519,9 +544,13 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
                 if(!(textCurrent == null))
                 {
                     String holderName = "list";
-                    bottoSheetCall.setState(BottomSheetBehavior.STATE_EXPANDED);
+                    bottomSheetCall.setState(BottomSheetBehavior.STATE_EXPANDED);
 
                     placeName(main.getContext(), mLocation.getLatitude(), mLocation.getLongitude(), holderName);
+
+                    String emergencyButton = "You may change the details or leave it as be. Don't forget to send your report.";
+
+                    textToSpeech.speak(emergencyButton, TextToSpeech.QUEUE_ADD, null, null);
                 }
                 else
                 {
@@ -535,6 +564,7 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
                             if(textCurrent != null)
                             {
                                 main.findViewById(R.id.fire_btn2).callOnClick();
+                                cancel();
                             }
                         }
 
@@ -547,16 +577,33 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
 
                 break;
             case R.id.sendButton:
+                String checkDetails = "Please check your details then send. After sending, wait for a nearby firefighter to respond to your incident location.";
+
+                textToSpeech.speak(checkDetails, TextToSpeech.QUEUE_ADD, null, null);
                 send();
                 break;
-            case R.id.checkOnMap:
-                fragment = new MapFragment();
+            case R.id.respondCheck:
+                fragment = new FragmentMap();
                 navigation = "map";
 
                 if(textCurrent != null)
                 {
                     Toast.makeText(requireContext(), "Location Detected", Toast.LENGTH_SHORT).show();
-                    ((MainActivity) getActivity()).navigateToFragment(fragment, navigation);
+                    ((ActivityMain) getActivity()).navigateToFragment(fragment, navigation);
+                }
+                else
+                {
+                    Toast.makeText(requireContext(), "Detecting Location", Toast.LENGTH_LONG).show();
+                }
+
+            case R.id.checkOnMap:
+                fragment = new FragmentMap();
+                navigation = "map";
+
+                if(textCurrent != null)
+                {
+                    Toast.makeText(requireContext(), "Location Detected", Toast.LENGTH_SHORT).show();
+                    ((ActivityMain) getActivity()).navigateToFragment(fragment, navigation);
                 }
                 else
                 {
@@ -565,13 +612,13 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
 
                 break;
             case R.id.seeLocation:
-                fragment = new MapFragment();
+                fragment = new FragmentMap();
                 navigation = "map";
 
                 if(textCurrent != null)
                 {
                     Toast.makeText(requireContext(), "Location Detected", Toast.LENGTH_SHORT).show();
-                    ((MainActivity) getActivity()).navigateToFragment(fragment, navigation);
+                    ((ActivityMain) getActivity()).navigateToFragment(fragment, navigation);
                 }
                 else
                 {
@@ -579,7 +626,111 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
                 }
 
                 break;
+            case R.id.cardView:
+                AlertDialog.Builder builder = new AlertDialog.Builder(main.getContext());
+                builder.setMessage("Emergency call? 911");
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        dialog.cancel();
+                    }
+                });
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        Intent dialIntent = new Intent(Intent.ACTION_DIAL);
+                        dialIntent.setData(Uri.parse("tel:" + "911"));
+                        startActivity(dialIntent);
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+                break;
+
+            case R.id.checkDirectories:
+
+                FragmentDirectories directories = new FragmentDirectories();
+
+                transaction.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left, R.anim.enter_from_left, R.anim.exit_to_right);
+
+                transaction
+                        .replace(R.id.container, directories, "fragment_directory")
+                        .addToBackStack(null)
+                        .commit();
+                break;
+            case R.id.chooseFromMap:
+
+                FragmentChooseMap chooseMap = new FragmentChooseMap();
+
+                if(chooseMap != null)
+                {
+                    transaction
+                            .replace(R.id.chooseMap, chooseMap, "choose_fragment")
+                            .addToBackStack(null)
+                            .commit();
+                }
+
+                bottomSheetCall.setState(BottomSheetBehavior.STATE_EXPANDED);
+                bottomSheetCall.setDraggable(false);
+
+                break;
         }
+    }
+
+    public void whenTyping()
+    {
+
+        userL.addTextChangedListener(new TextWatcher()
+        {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
+        {
+
+        }
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2)
+        {
+            AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
+
+            RectangularBounds bounds = RectangularBounds.newInstance
+                    (
+                            new LatLng(5, 114),
+                            new LatLng(21, 127));
+
+            FindAutocompletePredictionsRequest builder = FindAutocompletePredictionsRequest.builder()
+                    .setLocationBias(bounds)
+                    .setCountry("PH")
+                    .setSessionToken(token)
+                    .setQuery(userL.getText().toString())
+                    .build();
+
+            placesClient.findAutocompletePredictions(builder).addOnSuccessListener(response ->
+            {
+                for (AutocompletePrediction prediction : response.getAutocompletePredictions())
+                {
+                    pArray.add(String.valueOf(prediction.getFullText(null)));
+                    pAdapter.notifyDataSetChanged();
+                }
+
+            }).addOnFailureListener((exception) ->
+            {
+                if (exception instanceof ApiException) {
+                    ApiException apiException = (ApiException) exception;
+                }
+            });
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable)
+        {
+            pArray.clear();
+            pAdapter.notifyDataSetChanged();
+        }
+        
+        });
     }
 
     private void send()
@@ -598,6 +749,9 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
             @Override
             public void onClick(DialogInterface dialog, int which)
             {
+                String sendingReport = "You are now sending the report.";
+                String checkIntruction = "Please be safe and stay calm. You may check further instructions by tapping the directories.";
+                textToSpeech.speak(sendingReport + checkIntruction, TextToSpeech.QUEUE_ADD, null, null);
                 Fragment information;
 
                 Bundle bundle = new Bundle();
@@ -611,7 +765,7 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
 
                 sendReport(nUser, pUser, aUser, lUser, cUser);
 
-                bottoSheetCall.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                bottomSheetCall.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 if(!bundle.isEmpty())
                 {
                     bundle.clear();
@@ -623,7 +777,7 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
                 bundle.putString("Comment", cUser);
                 bundle.putString("TimeDate", dateFormat.format(new Date()));
 
-                information = new InformationFragment();
+                information = new FragmentInformation();
                 information.setArguments(bundle);
                 navigation = "information";
                 Toast.makeText(main.getContext(), "SENDING REPORT", Toast.LENGTH_LONG).show();
@@ -639,7 +793,7 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
                     public void onFinish()
                     {
                         Toast.makeText(main.getContext(), "REPORT SENT", Toast.LENGTH_SHORT).show();
-                        new CountDownTimer(1500, 1000){
+                        new CountDownTimer(1200, 1000){
 
                             @Override
                             public void onTick(long millisUntilFinished)
@@ -650,7 +804,9 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
                             @Override
                             public void onFinish()
                             {
-                                ((MainActivity) getActivity()).navigateToFragment(information, navigation);
+                                ((ActivityMain) getActivity()).navigateToFragment(information, navigation);
+                                textToSpeech.speak("This is your information. You may now view the map, for monitoring",
+                                        TextToSpeech.QUEUE_ADD, null, null);
                             }
                         }.start();
                     }
@@ -694,19 +850,35 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
                 dialog.cancel();
             }
         });
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener()
+        {
             @Override
             public void onClick(DialogInterface dialog, int which)
             {
                 FirebaseAuth.getInstance().signOut();
-                Intent intent = new Intent(main.getContext(), Login.class);
+                Intent intent = new Intent(main.getContext(), ActivityLogin.class);
                 startActivity(intent);
                 getActivity().getFragmentManager().popBackStack();
             }
         });
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
 
+    private void showFirstDialog()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(main.getContext());
+        builder.setMessage("This application sends location of incident reports by a user for firefighters to respond.");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener()
+        {
+            @Override
+            public void onClick(DialogInterface dialog, int which)
+            {
+                dialog.cancel();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     public void userDetails()
@@ -718,9 +890,7 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
         firebaseDatabase = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/");
         databaseReference = firebaseDatabase.getReference();
 
-        String responder = String.valueOf(counter);
-
-        ValueEventListener valueEventListener = new ValueEventListener()
+        valueEventListener = new ValueEventListener()
         {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot)
@@ -754,18 +924,29 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
 
     public void getResponders()
     {
+        String userId = auth.getCurrentUser().getUid();
+
+        List<String> countr = new ArrayList<>();
+        List<String> responderCounter = new ArrayList<>();
+
         FirebaseDatabase firebaseDatabase;
         DatabaseReference databaseReference;
         firebaseDatabase = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/");
         databaseReference = firebaseDatabase.getReference();
 
-        ValueEventListener valueEventListener = new ValueEventListener() {
+        ValueEventListener valueEventListener = new ValueEventListener()
+        {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot)
             {
-                if(counter != 0)
+                if(!countr.isEmpty())
                 {
-                    counter = 0;
+                    countr.clear();
+                }
+
+                if(!responderCounter.isEmpty())
+                {
+                    responderCounter.clear();
                 }
 
                 fusedLocationClient.getLastLocation().addOnCompleteListener(task ->
@@ -779,37 +960,76 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
                             Double lat = Snapshot.child("lat").getValue(Double.class);
                             Double lng = Snapshot.child("lng").getValue(Double.class);
 
-                            String show = String.valueOf(lat +", "+ lng);
-
                             LatLng fighterLocation = new LatLng(lat, lng);
                             LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
 
-                            if(calculateDistance(fighterLocation, userLocation) < 5001 && calculateDistance(fighterLocation, userLocation) > 1)
+                            if( calculateDistance(fighterLocation, userLocation) < 7001)
                             {
-                                counter++;
+                                countr.add(String.valueOf(fighterLocation));
                             }
-                            String responder = String.valueOf(counter);
+
+                            String responder = String.valueOf(countr.size());
                             textAvailable.setText("Available responder/s: " + responder);
+                        }
+
+                        for(DataSnapshot Snapshot: snapshot.child("Users").getChildren())
+                        {
+                            String checkID = Snapshot.getKey();
+
+                            if(userId == checkID)
+                            {
+                                long currentTime = System.currentTimeMillis();
+
+                                long thirtyMinutesInMillis = 30 * 60 * 1000;
+
+                                if(Snapshot.child("Report").hasChild("TimeStamp"))
+                                {
+                                    long timeStamp = Snapshot.child("Report").child("TimeStamp").getValue(Long.class);
+
+                                    if (currentTime - timeStamp >= thirtyMinutesInMillis)
+                                    {
+                                        firebaseDatabase.getReference().child("Users").child(userId).child("Report").child("Location").removeValue();
+                                    }
+                                }
+                            }
+
+                            for(DataSnapshot Snapshot2: Snapshot.child("Responders").getChildren())
+                            {
+                                if(userId == checkID)
+                                {
+                                    String responderID = Snapshot2.getKey();
+                                    Boolean status = Snapshot2.child("Status").getValue(Boolean.class);
+
+                                    if(status == true)
+                                    {
+                                        responderCounter.add(String.valueOf(status));
+                                    }
+
+                                    String responderCount = String.valueOf(responderCounter.size());
+                                    textResponders.setText("Responder/s: " + responderCount);
+                                }
+                            }
                         }
                     }
                 });
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            public void onCancelled(@NonNull DatabaseError error)
+            {
 
             }
         };
 
         databaseReference.addValueEventListener(valueEventListener);
-
     }
 
     public void sendReport(String name, String phone, String address, String location, String comment)
     {
         String userId = auth.getCurrentUser().getUid();
-        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
-        CollectionReference usersRef = firebaseFirestore.collection("Users");
+
+        long currentTime = System.currentTimeMillis();
+
         dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault());
         String timeDate = dateFormat.format(new Date());
 
@@ -820,13 +1040,15 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
         report.put("Location", location);
         report.put("Comment", comment);
         report.put("Date & Time", timeDate);
+        report.put("TimeStamp", currentTime);
 
-        DocumentReference userRef = firebaseFirestore.collection("Users").document(userId);
-        CollectionReference reportRef = userRef.collection("Reports");
+        FirebaseDatabase firebaseDatabase;
+        DatabaseReference databaseReference;
+        firebaseDatabase = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/");
+        databaseReference = firebaseDatabase.getReference("Users");
 
-        reportRef.add(report);
-        firebaseFirestore.collection("Users").document(userId).set(report);
-
+        databaseReference.child(userId).child("Report").updateChildren(report);
+        databaseReference.child(userId).child("Report").child("Reports").push().updateChildren(report);
     }
 
     public void hideKeyboard(View view)
@@ -877,6 +1099,17 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
         return distance;
     }
 
+    public void showAddress()
+    {
+        whenTyping();
+
+        Bundle address = getArguments();
+
+        String getAddress = address.getString("getaddress");
+
+        userL.setText(getAddress);
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
     {
@@ -891,5 +1124,15 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
 
             }
         }
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event)
+    {
+        switch (v.getId())
+        {
+
+        }
+        return false;
     }
 }

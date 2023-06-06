@@ -14,7 +14,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -28,19 +27,18 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 @SuppressWarnings("ALL")
-public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener,
+public class ActivityMain extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener,
         NavigationView.OnNavigationItemSelectedListener {
 
     FirebaseAuth auth = FirebaseAuth.getInstance();
     FirebaseUser currentUser = auth.getCurrentUser();
 
-    MainFragment mainFragment = new MainFragment();
-    RecordFragment recordFragment = new RecordFragment();
-    MapFragment mapFragment = new MapFragment();
+    FragmentHome mainFragment = new FragmentHome();
+    FragmentRecord recordFragment = new FragmentRecord();
+    FragmentMap mapFragment = new FragmentMap();
+    FragmentChat chatFragment = new FragmentChat();
 
     BottomNavigationView bottomNavigationView;
-
-    private MapFragment mFragment;
 
     public View headerView;
 
@@ -60,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
         if (currentUser == null)
         {
-            Intent intent = new Intent(this, Login.class);
+            Intent intent = new Intent(this, ActivityLogin.class);
             startActivity(intent);
             finish();
             return;
@@ -72,9 +70,6 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
     public void mainEvents()
     {
-        FragmentManager mFrag = getSupportFragmentManager();
-        mFragment = (MapFragment) mFrag.findFragmentByTag("MapFragment");
-
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
 
@@ -92,6 +87,11 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
+
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.container, mainFragment, "home_fragment")
+                .commit();
+
         bottomNavigationView.setSelectedItemId(R.id.btmHome);
     }
 
@@ -116,7 +116,13 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 return true;
 
             case R.id.btmMap:
-                transaction.replace(R.id.container, mapFragment);
+                transaction.replace(R.id.container, mapFragment, "map_fragment");
+                transaction.addToBackStack(null);
+                transaction.commit();
+                return true;
+
+            case R.id.btmChat:
+                transaction.replace(R.id.container, chatFragment, "chat_fragment");
                 transaction.addToBackStack(null);
                 transaction.commit();
                 return true;
@@ -134,6 +140,38 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
             case R.id.nav_logout:
                 logoutUser();
+                return true;
+            case R.id.nav_fighter:
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+                builder.setMessage
+                        ("This is a BETA Application therefore:" +
+                        "\nEmail: dispatchofficial@gmail.com." +
+                        "\nProvide verification:" +
+                        "\n\t- An identification (ID) of a fireman will do." +
+                        "\n\t- A selfie beside with the provided ID." +
+                        "\nAdmin will send the APK.");
+
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        dialog.cancel();
+                    }
+                });
+                builder.setPositiveButton("Ok", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                       Toast.makeText(ActivityMain.this, "Thank you for your service!", Toast.LENGTH_LONG).show();
+                    }
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
                 return true;
         }
 
@@ -158,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
             {
 
                 FirebaseAuth.getInstance().signOut();
-                Intent intent = new Intent(MainActivity.this, Login.class);
+                Intent intent = new Intent(ActivityMain.this, ActivityLogin.class);
                 startActivity(intent);
                 try {
                     finalize();
@@ -208,7 +246,6 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction
-                .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left, R.anim.enter_from_left, R.anim.exit_to_right)
                 .replace(R.id.container, fragment)
                 .addToBackStack(null)
                 .commit();
@@ -222,12 +259,10 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 bottomNavigationView.setSelectedItemId(R.id.btmHome);
                 break;
         }
-
     }
 
     private void exit()
     {
-
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Are you sure you want to exit?");
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener()

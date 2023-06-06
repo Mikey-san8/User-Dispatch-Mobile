@@ -8,12 +8,13 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 
-public class InformationFragment extends Fragment
+public class FragmentInformation extends Fragment
 {
     View info;
 
@@ -32,7 +33,7 @@ public class InformationFragment extends Fragment
 
     String navigation;
 
-    public InformationFragment()
+    public FragmentInformation()
     {
 
     }
@@ -40,7 +41,7 @@ public class InformationFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        info = inflater.inflate(R.layout.report_info, container, false);
+        info = inflater.inflate(R.layout.fragment_info, container, false);
 
         events();
 
@@ -71,15 +72,24 @@ public class InformationFragment extends Fragment
         infoComment.setText(comment);
         timeDate.setText(time);
 
-        info.findViewById(R.id.logo_demo).setOnClickListener(new View.OnClickListener()
+        info.findViewById(R.id.infoGotoMap2).setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                Fragment map;
-                map = new MapFragment();
-                navigation = "map";
-                ((MainActivity) requireActivity()).navigateToFragment(map, navigation);
+                FragmentMap mapFragment = (FragmentMap) getParentFragmentManager().findFragmentByTag("map_fragment");
+
+                FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+
+                if (mapFragment != null)
+                {
+                    transaction
+                            .replace(R.id.container, mapFragment)
+                            .addToBackStack(null)
+                            .commit();
+                }
+
+                ((ActivityMain) requireActivity()).bottomNavigationView.setSelectedItemId(R.id.btmMap);
             }
         });
 
@@ -89,9 +99,9 @@ public class InformationFragment extends Fragment
             public void onClick(View v)
             {
                 Fragment main;
-                main = new MainFragment();
+                main = new FragmentHome();
                 navigation = "main";
-                ((MainActivity) requireActivity()).navigateToFragment(main, navigation);
+                ((ActivityMain) requireActivity()).navigateToFragment(main, navigation);
             }
         });
     }

@@ -9,10 +9,6 @@
             android:id="@+id/nav_home"
             android:title="Home"/>
         <item
-            android:id="@+id/nav_settings"
-
-            android:title="Settings"/>
-        <item
             android:id="@+id/nav_share"
 
             android:title="Share"/>
@@ -20,14 +16,29 @@
             android:id="@+id/nav_about"
 
             android:title="About Us"/>
+        <item
+            android:id="@+id/nav_help"
+
+            android:title="Help"/>
+
+        <item
+            android:id="@+id/nav_settings"
+
+            android:title="Settings"/>
     </group>
+
     <item
         android:title="">
         <menu>
+            <item
+                android:id="@+id/nav_fighter"
+                android:title="Firefighter"
+                android:icon="@drawable/ic_baseline_fire_extinguisher_24"/>
             <item
                 android:id="@+id/nav_logout"
                 android:icon="@drawable/logout"
                 android:title="Logout"/>
         </menu>
     </item>
+
 </menu>

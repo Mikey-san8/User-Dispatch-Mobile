@@ -14,6 +14,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:allowBackup="true"
@@ -25,14 +26,7 @@
         android:theme="@style/Theme.DISPATCHMAIN"
         tools:targetApi="31">
         <activity
-            android:name=".Records"
-            android:exported="false">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
-        <activity
-            android:name=".SplashScreen"
+            android:name=".ActivitySplash"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -45,21 +39,21 @@
                 android:value="" />
         </activity>
         <activity
-            android:name=".Register"
+            android:name=".ActivityRegister"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
         <activity
-            android:name=".Login"
+            android:name=".ActivityLogin"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".ActivityMain"
             android:exported="false"
             android:windowSoftInputMode="adjustResize">
             <meta-data
@@ -77,7 +71,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDKHY_L76RS3qMCyDSctItyGycxGAwBK8U" />
+            android:value="AIzaSyDKmNOWX9-j1NyReDFb6-5R9P2wdIKJvyg" />
     </application>
 
 </manifest>
