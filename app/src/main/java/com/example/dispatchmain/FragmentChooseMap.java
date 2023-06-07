@@ -24,6 +24,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -93,13 +94,24 @@ public class FragmentChooseMap extends Fragment implements OnMapReadyCallback {
             if (isMarkerDragging)
             {
                 draggedMarker.setPosition(mGoogleMap.getCameraPosition().target);
-                mGoogleMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
-                    @Override
-                    public void onCameraIdle() {
-                        draggedMarkerPosition = mGoogleMap.getCameraPosition().target;
-                        getAddressFromLocation(draggedMarkerPosition.latitude, draggedMarkerPosition.longitude);
-                    }
-                });
+            }
+        });
+
+        choose.findViewById(R.id.placePin).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                draggedMarkerPosition = mGoogleMap.getCameraPosition().target;
+                getAddressFromLocation(draggedMarkerPosition.latitude, draggedMarkerPosition.longitude);
+            }
+        });
+
+        choose.findViewById(R.id.findLocation).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                enableMyLocation();
             }
         });
 
@@ -108,6 +120,11 @@ public class FragmentChooseMap extends Fragment implements OnMapReadyCallback {
 
     private void enableMyLocation()
     {
+        if(draggedMarker != null)
+        {
+            draggedMarker.remove();
+        }
+
         locationClient.getLastLocation().addOnCompleteListener(task -> {
 
             if (task.isSuccessful())
@@ -115,7 +132,10 @@ public class FragmentChooseMap extends Fragment implements OnMapReadyCallback {
                 Location location = task.getResult();
 
                 LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                draggedMarker = mGoogleMap.addMarker(new MarkerOptions().position(latLng).draggable(true));
+                draggedMarker = mGoogleMap.addMarker(new MarkerOptions()
+                        .position(latLng)
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE))
+                        .draggable(true));
                 previousMarkerPosition = latLng;
                 mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
             }

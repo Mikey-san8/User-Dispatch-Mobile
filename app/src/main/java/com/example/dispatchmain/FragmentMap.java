@@ -13,6 +13,8 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -31,6 +33,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.common.api.ApiException;
@@ -52,6 +55,7 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.AutocompletePrediction;
@@ -71,7 +75,13 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
+import com.google.maps.PendingResult;
+import com.google.maps.internal.PolylineEncoding;
+import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.DirectionsRoute;
+import com.google.maps.model.TravelMode;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionDeniedResponse;
@@ -89,7 +99,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @SuppressWarnings("ALL")
-public class FragmentMap extends Fragment implements OnMapReadyCallback, View.OnClickListener, AdapterView.OnItemClickListener
+public class FragmentMap extends Fragment implements OnMapReadyCallback, View.OnClickListener, AdapterView.OnItemClickListener, GoogleMap.OnPolylineClickListener
 {
     FirebaseAuth auth = FirebaseAuth.getInstance();
     String API_KEY = "AIzaSyDKmNOWX9-j1NyReDFb6-5R9P2wdIKJvyg";
@@ -118,7 +128,6 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
 
     private ArrayList<String>   placeArray,
                                 responderArray;
-
 
     private ArrayAdapter<String>    placeAdapter,
                                     responderAdapter;
@@ -209,6 +218,7 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
         responderList = map.findViewById(R.id.listResponders);
 
         searhPlace.setOnItemClickListener(this);
+        responderList.setOnItemClickListener(this);
 
         searchLayout = map.findViewById(R.id.layoutSearch);
 
@@ -239,6 +249,8 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
             }
         });
 
+        CardView seeList = map.findViewById(R.id.linearSeeList);
+
         bottomResponders.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState)
@@ -250,7 +262,7 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
                         break;
                     case BottomSheetBehavior.STATE_EXPANDED:
                     {
-
+                        seeList.setVisibility(View.INVISIBLE);
                     }
                     break;
                     case BottomSheetBehavior.STATE_DRAGGING:
@@ -267,7 +279,7 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
                     break;
                     case BottomSheetBehavior.STATE_COLLAPSED:
                     {
-
+                        seeList.setVisibility(View.VISIBLE);
                     }
                     break;
                 }
@@ -576,7 +588,6 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
             case R.id.seeResponders:
                 bottomResponders.setState(BottomSheetBehavior.STATE_EXPANDED);
 
-
                 break;
         }
     }
@@ -587,6 +598,12 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
         {
             case R.id.listSearch:
                 search.setText(parent.getAdapter().getItem(position).toString());
+                break;
+            case R.id.listResponders:
+                LatLng markerLoc = new LatLng(respondMarkers.get(position).getPosition().latitude, respondMarkers.get(position).getPosition().longitude);
+
+                calculateDirections(markerLoc, incidentLocation);
+
                 break;
         }
     }
@@ -686,24 +703,22 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
                     responderArray.clear();
                     responderAdapter.notifyDataSetChanged();
                 }
-
-//               for(Marker marker: respondMarkers)
-//               {
-//                   marker.remove();
-//               }
                     for(DataSnapshot users: snapshot.child("Users").getChildren())
                     {
                         String userIDs = users.getKey();
 
                         if(userIDs == userId)
                         {
-                            String fireLocation = users.child("Report").child("Location").getValue(String.class);
-                            LatLng fireMark = getCalculations(fireLocation);
+                            if(users.child("Report").hasChild("Location"))
+                            {
+                                String fireLocation = users.child("Report").child("Location").getValue(String.class);
+                                LatLng fireMark = getCalculations(fireLocation);
 
-                            mGoogleMap.addMarker(new MarkerOptions()
-                                    .position(fireMark)
-                                    .title(fireLocation)
-                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.fireicon)));
+                                mGoogleMap.addMarker(new MarkerOptions()
+                                        .position(fireMark)
+                                        .title(fireLocation)
+                                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.fireicon)));
+                            }
 
                             for(DataSnapshot responders: users.child("Responders").getChildren())
                             {
@@ -713,85 +728,86 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
 
                                 String show = String.valueOf(status);
 
-                                if(status == true)
+                                long currentTime = System.currentTimeMillis();
+
+                                if(responders.hasChild("TimeStamp"))
                                 {
-                                    Marker marker;
+                                    long timeStamp = responders.child("TimeStamp").getValue(Long.class);
 
-                                    String iLocation = users.child("Report").child("Location").getValue(String.class);
+                                    long checkTime = 30 * 60 * 1000;
 
-                                    incidentLocation = getCalculations(iLocation);
-
-                                    fighterLocation = new Location("service Provider");
-                                    fighterLocation.setLatitude(incidentLocation.latitude);
-                                    fighterLocation.setLongitude(incidentLocation.longitude);
-
-                                    Double lat = snapshot.child("Firefighter").child(responderID).child("lat").getValue(Double.class);
-                                    Double lng = snapshot.child("Firefighter").child(responderID).child("lng").getValue(Double.class);
-                                    Float bearing = snapshot.child("Firefighter").child(responderID).child("bearing").getValue(Float.class);
-
-                                    fighterMark = new LatLng(lat, lng);
-
-                                    fighterLoc = new Location("service Provider");
-                                    fighterLoc.setLatitude(lat);
-                                    fighterLoc.setLongitude(lng);
-
-                                    if(bearing != null)
+                                    if(status == true && currentTime - timeStamp <= checkTime)
                                     {
-                                        fighterLoc.setBearing(bearing);
-                                    }
+                                        Marker marker;
+
+                                        if(users.child("Report").hasChild("Location"))
+                                        {
+                                            String iLocation = users.child("Report").child("Location").getValue(String.class);
+
+                                            incidentLocation = getCalculations(iLocation);
+
+                                            fighterLocation = new Location("service Provider");
+                                            fighterLocation.setLatitude(incidentLocation.latitude);
+                                            fighterLocation.setLongitude(incidentLocation.longitude);
+
+                                            Double lat = snapshot.child("Firefighter").child(responderID).child("lat").getValue(Double.class);
+                                            Double lng = snapshot.child("Firefighter").child(responderID).child("lng").getValue(Double.class);
+                                            Float bearing = snapshot.child("Firefighter").child(responderID).child("bearing").getValue(Float.class);
+
+                                            fighterMark = new LatLng(lat, lng);
+
+                                            fighterLoc = new Location("service Provider");
+                                            fighterLoc.setLatitude(lat);
+                                            fighterLoc.setLongitude(lng);
+
+                                            if(bearing != null)
+                                            {
+                                                fighterLoc.setBearing(bearing);
+                                            }
 
 //                                    if(calculateDistance(fighterMark, userMark) > 585 && calculateDistance(fighterMark, userMark) < 600)
 //                                    {
 //                                        String nameFighter = snapshot.child("Firefighter").child(responderID).child("firstName").getValue(String.class);
 //                                        Toast.makeText(requireContext(), "Firefighter: " + nameFighter + " is nearby...", Toast.LENGTH_SHORT).show();
 //                                    }
-                                    
-                                    if (markerMap.get(responderID) != null && markerMap.get(responderID).isVisible())
-                                    {
-                                        markerMap.get(responderID).setPosition(fighterMark);
-                                        markerMap.get(responderID).setRotation(fighterLoc.getBearing());
+
+                                            if (markerMap.get(responderID) != null && markerMap.get(responderID).isVisible())
+                                            {
+                                                markerMap.get(responderID).setPosition(fighterMark);
+                                                markerMap.get(responderID).setRotation(fighterLoc.getBearing());
+                                            }
+                                            else
+                                            {
+                                                marker = mGoogleMap.addMarker(new MarkerOptions()
+                                                        .position(fighterMark)
+                                                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.firetruck))
+                                                        .rotation(fighterLoc.getBearing())
+                                                        .anchor((float) 0.5, (float) 0.5));
+                                                markerMap.put(responderID, marker);
+                                                respondMarkers.add(marker);
+                                            }
+
+                                            String name = "Name: " +
+                                                    snapshot.child("Firefighter").child(responderID).child("lastName").getValue(String.class);
+                                            String station = "Station Address: " +
+                                                    snapshot.child("Firefighter").child(responderID).child("station").getValue(String.class);
+                                            String telephone = "Telephone Number: " +
+                                                    snapshot.child("Firefighter").child(responderID).child("telephone").getValue(String.class);
+                                            String phone = "Mobile Number: " +
+                                                    snapshot.child("Firefighter").child(responderID).child("phone").getValue(String.class);
+
+                                            responderArray.add(name +
+                                                    "\n" + station +
+                                                    "\n" + telephone +
+                                                    "\n" + phone);
+                                            responderAdapter.notifyDataSetChanged();
+
+                                            responder.add(String.valueOf(status));
+
+                                            String responderCount = String.valueOf(responder.size());
+                                            textMapResponders.setText("Responder/s: " + responderCount);
+                                        }
                                     }
-                                    else
-                                    {
-                                        marker = mGoogleMap.addMarker(new MarkerOptions()
-                                                .position(fighterMark)
-                                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.firetruck))
-                                                .rotation(fighterLoc.getBearing())
-                                                .anchor((float) 0.5, (float) 0.5));
-                                        markerMap.put(responderID, marker);
-                                        respondMarkers.add(marker);
-                                    }
-
-//                                    LatLngBounds bounds;
-//
-//                                    for(Marker marker1: respondMarkers)
-//                                    {
-//                                        builder.include(marker1.getPosition());
-//                                    }
-//
-//                                    bounds = builder.build();
-//                                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 250);
-//                                    mGoogleMap.animateCamera(cameraUpdate);
-
-                                    responder.add(String.valueOf(status));
-
-                                    String responderCount = String.valueOf(responder.size());
-                                    textMapResponders.setText("Responder/s: " + responderCount);
-
-                                    String name = "Name: " +
-                                            snapshot.child("Firefighter").child(responderID).child("lastName").getValue(String.class);
-                                    String station = "Station Address: " +
-                                            snapshot.child("Firefighter").child(responderID).child("station").getValue(String.class);
-                                    String telephone = "Telephone Number: " +
-                                            snapshot.child("Firefighter").child(responderID).child("telephone").getValue(String.class);
-                                    String phone = "Mobile Number: " +
-                                            snapshot.child("Firefighter").child(responderID).child("phone").getValue(String.class);
-
-                                    responderArray.add(name +
-                                            "\n" + station +
-                                            "\n" + telephone +
-                                            "\n" + phone);
-                                    responderAdapter.notifyDataSetChanged();
                                 }
                                 else
                                 {
@@ -800,6 +816,9 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
                                         markerMap.get(responderID).setVisible(false);
                                         markerMap.get(responderID).remove();
                                     }
+
+                                    String responderCount = String.valueOf(responder.size());
+                                    textMapResponders.setText("Responder/s: " + responderCount);
                                 }
                             }
                         }
@@ -912,7 +931,7 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
     public void showNearbyPlaces(List<HashMap<String, String>> nearbyPlaceList)
     {
         String stationCount = String.valueOf(nearbyPlaceList.size());
-        textFindStations.setText("Nearby Fire Station/s: " + stationCount);
+        textFindStations.setText("Nearby fire station/s: " + stationCount);
 
         findStations.setOnClickListener(new View.OnClickListener()
         {
@@ -979,6 +998,110 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
                 getData.execute(dataTransfer);
             }
         });
+    }
+
+    public void calculateDirections(LatLng origin, LatLng end)
+    {
+        DirectionsApiRequest directions = new DirectionsApiRequest(mGeoApiContext);
+        directions.alternatives(true)
+                .mode(TravelMode.DRIVING)
+                .origin(new com.google.maps.model.LatLng(origin.latitude, origin.longitude))
+                .destination(new com.google.maps.model.LatLng(end.latitude, end.longitude))
+                .setCallback(new PendingResult.Callback<DirectionsResult>()
+                {
+                    @Override
+                    public void onResult(DirectionsResult result)
+                    {
+                        addPolylines(result);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable e) {
+
+                    }
+                });
+    }
+
+    public void addPolylines(final DirectionsResult result)
+    {
+
+        new Handler(Looper.getMainLooper()).post(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                if(mPolyLinesData.size() > 0)
+                {
+                    for(zPolylineData polylineData: mPolyLinesData)
+                    {
+                        polylineData.getPolyline().remove();
+                    }
+                    mPolyLinesData.clear();
+                    mPolyLinesData = new ArrayList<>();
+                }
+
+                double duration = 999999999;
+                double tempDuration = 0;
+
+                for(DirectionsRoute route: result.routes)
+                {
+                    List<com.google.maps.model.LatLng> decodedPath = PolylineEncoding.decode(route.overviewPolyline.getEncodedPath());
+
+                    List<LatLng> newDecodedPath = new ArrayList<>();
+
+                    for(com.google.maps.model.LatLng latLng: decodedPath)
+                    {
+                        newDecodedPath.add(new LatLng(latLng.lat, latLng.lng));
+                    }
+
+                    tempDuration = route.legs[0].duration.inSeconds;
+
+                    if (tempDuration < duration)
+                    {
+                        duration = tempDuration;
+
+                        polyline = mGoogleMap.addPolyline(new PolylineOptions().addAll(newDecodedPath));
+                        polyline.setWidth(25);
+                        polyline.setClickable(true);
+
+                        polylineOnmap.add(polyline);
+                        mPolyLinesData.add(new zPolylineData(polyline, route.legs[0], route.legs[0].steps[0]));
+                        polylineData = new zPolylineData(polyline, route.legs[0], route.legs[0].steps[0]);
+
+                        onPolylineClick(polyline);
+                    }
+                }
+
+                List<LatLng> points = polyline.getPoints();
+
+                LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+                for (LatLng point : points)
+                {
+                    builder.include(point);
+                }
+
+                LatLngBounds bounds = builder.build();
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 250);
+                mGoogleMap.animateCamera(cameraUpdate);
+            }
+        });
+    }
+
+    @Override
+    public void onPolylineClick(@NonNull Polyline polyline)
+    {
+        for(zPolylineData polylineData: mPolyLinesData)
+        {
+            if(polyline.getId().equals(polylineData.getPolyline().getId()))
+            {
+                polylineData.getPolyline().setColor(getResources().getColor(R.color.LineDirection));
+                polylineData.getPolyline().setZIndex(1);;
+
+                String distance = String.valueOf(polylineData.getLeg().distance);
+                String duration = String.valueOf(polylineData.getLeg().duration);
+            }
+        }
     }
 
     public void hideKeyboard(View view)

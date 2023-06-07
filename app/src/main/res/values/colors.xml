@@ -8,4 +8,5 @@
     <color name="black">#FD9696</color>
     <color name="white">#FFFFFFFF</color>
     <color name="text_color">#FFFF5858</color>
+    <color name="LineDirection">#FF7676</color>
 </resources>

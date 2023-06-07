@@ -9,14 +9,12 @@ public class zPolylineData {
     private Polyline polyline;
     private DirectionsLeg leg;
     private DirectionsStep steps;
-    private String ID;
 
-    public zPolylineData(Polyline polyline, DirectionsLeg leg, DirectionsStep steps, String ID)
+    public zPolylineData(Polyline polyline, DirectionsLeg leg, DirectionsStep steps)
     {
         this.polyline = polyline;
         this.leg = leg;
         this.steps = steps;
-        this.ID = ID;
     }
 
     public Polyline getPolyline() {
@@ -41,14 +39,6 @@ public class zPolylineData {
 
     public void setSteps(DirectionsStep steps) {
         this.steps = steps;
-    }
-
-    public String getID() {
-        return ID;
-    }
-
-    public void setID(String ID) {
-        this.ID = ID;
     }
 
     @Override

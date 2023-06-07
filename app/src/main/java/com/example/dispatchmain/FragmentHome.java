@@ -146,6 +146,8 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
 
     TextToSpeech textToSpeech;
 
+    public Boolean isDialogShown = false;
+
     public FragmentHome()
     {
 
@@ -736,7 +738,11 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
     private void send()
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setMessage("Please check your details");
+        builder.setMessage("House Bill 10706\nAN ACT PENALIZING PRANK CALLERS TO EMERGENCY HOTLINES\n\n" +
+                "Emergency hotlines established for the purpose of " +
+                "responding to emergency situations shall, at all times, be free from receiving " +
+                "unnecessary calls. It shall be prohibited for any individual to make prank calls to any " +
+                "hotline at any time.\n\n"+ "Please check your details before sending.");
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
         {
             @Override
@@ -867,18 +873,23 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
 
     private void showFirstDialog()
     {
-        AlertDialog.Builder builder = new AlertDialog.Builder(main.getContext());
-        builder.setMessage("This application sends location of incident reports by a user for firefighters to respond.");
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener()
+        if(isDialogShown == false)
         {
-            @Override
-            public void onClick(DialogInterface dialog, int which)
+            AlertDialog.Builder builder = new AlertDialog.Builder(main.getContext());
+            builder.setMessage("This application sends location of incident reports by a user for firefighters to respond.");
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener()
             {
-                dialog.cancel();
-            }
-        });
-        AlertDialog dialog = builder.create();
-        dialog.show();
+                @Override
+                public void onClick(DialogInterface dialog, int which)
+                {
+                    dialog.cancel();
+                }
+            });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+
+            isDialogShown = true;
+        }
     }
 
     public void userDetails()
@@ -957,19 +968,32 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
 
                         for (DataSnapshot Snapshot: snapshot.child("Firefighter").getChildren())
                         {
-                            Double lat = Snapshot.child("lat").getValue(Double.class);
-                            Double lng = Snapshot.child("lng").getValue(Double.class);
-
-                            LatLng fighterLocation = new LatLng(lat, lng);
-                            LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-
-                            if( calculateDistance(fighterLocation, userLocation) < 7001)
+                            if(Snapshot.hasChild("online status"))
                             {
-                                countr.add(String.valueOf(fighterLocation));
-                            }
+                                Boolean onlineStatus = Snapshot.child("online status").getValue(Boolean.class);
 
-                            String responder = String.valueOf(countr.size());
-                            textAvailable.setText("Available responder/s: " + responder);
+                                if(onlineStatus == true)
+                                {
+                                    Double lat = Snapshot.child("lat").getValue(Double.class);
+                                    Double lng = Snapshot.child("lng").getValue(Double.class);
+
+                                    LatLng fighterLocation = new LatLng(lat, lng);
+                                    LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+
+                                    if( calculateDistance(fighterLocation, userLocation) < 7001)
+                                    {
+                                        countr.add(String.valueOf(fighterLocation));
+                                    }
+
+                                    String responder = String.valueOf(countr.size());
+                                    textAvailable.setText("Available responder/s: " + responder);
+                                }
+                                else
+                                {
+                                    String responder = String.valueOf(countr.size());
+                                    textAvailable.setText("Available responder/s: " + responder);
+                                }
+                            }
                         }
 
                         for(DataSnapshot Snapshot: snapshot.child("Users").getChildren())
@@ -1000,13 +1024,26 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
                                     String responderID = Snapshot2.getKey();
                                     Boolean status = Snapshot2.child("Status").getValue(Boolean.class);
 
-                                    if(status == true)
-                                    {
-                                        responderCounter.add(String.valueOf(status));
-                                    }
+                                    long currentTime = System.currentTimeMillis();
 
-                                    String responderCount = String.valueOf(responderCounter.size());
-                                    textResponders.setText("Responder/s: " + responderCount);
+                                    if(Snapshot2.hasChild("TimeStamp"))
+                                    {
+                                        long timeStamp = Snapshot2.child("TimeStamp").getValue(Long.class);
+                                        long checkTime = 30 * 60 * 1000;
+
+                                        if(status == true && currentTime - timeStamp <= checkTime)
+                                        {
+                                            responderCounter.add(String.valueOf(status));
+
+                                            String responderCount = String.valueOf(responderCounter.size());
+                                            textResponders.setText("Responder/s: " + responderCount);
+                                        }
+                                        else
+                                        {
+                                            String responderCount = String.valueOf(responderCounter.size());
+                                            textResponders.setText("Responder/s: " + responderCount);
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -1045,10 +1082,11 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
         FirebaseDatabase firebaseDatabase;
         DatabaseReference databaseReference;
         firebaseDatabase = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/");
-        databaseReference = firebaseDatabase.getReference("Users");
+        databaseReference = firebaseDatabase.getReference();
 
-        databaseReference.child(userId).child("Report").updateChildren(report);
-        databaseReference.child(userId).child("Report").child("Reports").push().updateChildren(report);
+        databaseReference.child("Users").child(userId).child("Report").updateChildren(report);
+        databaseReference.child("Users").child(userId).child("Report").child("Reports").push().updateChildren(report);
+        databaseReference.child("Data").push().updateChildren(report);
     }
 
     public void hideKeyboard(View view)
