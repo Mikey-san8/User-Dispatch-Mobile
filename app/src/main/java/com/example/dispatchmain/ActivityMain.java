@@ -37,6 +37,7 @@ public class ActivityMain extends AppCompatActivity implements BottomNavigationV
     FragmentRecord recordFragment = new FragmentRecord();
     FragmentMap mapFragment = new FragmentMap();
     FragmentChat chatFragment = new FragmentChat();
+    FragmentEditProfile editFragment = new FragmentEditProfile();
 
     BottomNavigationView bottomNavigationView;
 
@@ -89,7 +90,13 @@ public class ActivityMain extends AppCompatActivity implements BottomNavigationV
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
 
         getSupportFragmentManager().beginTransaction()
+                .add(R.id.container, editFragment, "edit_fragment")
+                .addToBackStack(null)
+                .commit();
+
+        getSupportFragmentManager().beginTransaction()
                 .add(R.id.container, mainFragment, "home_fragment")
+                .addToBackStack(null)
                 .commit();
 
         bottomNavigationView.setSelectedItemId(R.id.btmHome);

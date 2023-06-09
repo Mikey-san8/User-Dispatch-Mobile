@@ -1,13 +1,13 @@
 package com.example.dispatchmain;
 
-public class DataItem
+public class zDataItem
 {
     private String name;
     private String chat;
     private String time;
     private String key;
 
-    public DataItem(String name, String chat, String time, String key)
+    public zDataItem(String name, String chat, String time, String key)
     {
         this.name = name;
         this.chat = chat;

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -11,20 +11,13 @@
         android:id="@+id/linearMainLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:layout_marginStart="5dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0">
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="10dp">
 
         <ImageView
             android:id="@+id/imageView4"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginLeft="10dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             app:srcCompat="@drawable/fighter" />
 
         <LinearLayout
@@ -40,23 +33,23 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="top|left"
                 android:text="Hello!"
-                android:textSize="16sp"
+                android:textSize="15sp"
                 android:textStyle="italic" />
 
             <TextView
-                android:id="@+id/textView6"
+                android:id="@+id/checkProfile"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Check Profile"
                 android:textColor="#FF5858"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
     </LinearLayout>
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/textFireArea"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:autoSizeMaxTextSize="30sp"
@@ -67,35 +60,24 @@
         android:textColor="#575757"
         android:textSize="25sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearResponder"
-        app:layout_constraintVertical_bias="0.031" />
+        android:layout_below="@+id/linearResponder"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"/>
 
     <ImageView
         android:id="@+id/blink_btn"
         android:layout_width="180dp"
         android:layout_height="180dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.499"
         app:srcCompat="@drawable/circle_button"
-        app:tint="#DBE2F1" />
+        app:tint="#DBE2F1"
+        android:layout_centerInParent="true"/>
 
     <ImageView
         android:id="@+id/shadow"
         android:layout_width="110dp"
         android:layout_height="110dp"
-        app:layout_constraintBottom_toBottomOf="@+id/blink_btn"
-        app:layout_constraintEnd_toEndOf="@+id/blink_btn"
-        app:layout_constraintStart_toStartOf="@+id/blink_btn"
-        app:layout_constraintTop_toTopOf="@+id/blink_btn"
         app:srcCompat="@drawable/circle_button"
+        android:layout_centerInParent="true"
         app:tint="#FBCDCD" />
 
     <ImageView
@@ -104,37 +86,29 @@
         android:layout_height="90dp"
         app:srcCompat="@drawable/circle_button"
         app:tint="#FF7272"
-        app:layout_constraintBottom_toBottomOf="@+id/blink_btn"
-        app:layout_constraintEnd_toEndOf="@+id/blink_btn"
-        app:layout_constraintStart_toStartOf="@+id/blink_btn"
-        app:layout_constraintTop_toTopOf="@+id/blink_btn"/>
+        android:layout_centerInParent="true"/>
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/textTap"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Tap the button to process call"
         android:textSize="12sp"
         android:textStyle="italic"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rescue"
-        app:layout_constraintVertical_bias="0.018" />
+        android:layout_below="@+id/rescue"
+        android:layout_marginTop="10dp"
+        android:layout_centerHorizontal="true"/>
 
     <TextView
-        android:id="@+id/textView8"
+        android:id="@+id/textYouMay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/blink_btn"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="30dp"
         android:text="You may check available responder/s above"
         android:textColor="#A8A8A8"
-        android:textStyle="italic"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/blink_btn"
-        app:layout_constraintVertical_bias="0.116" />
+        android:textStyle="italic" />
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -144,12 +118,8 @@
         android:background="@drawable/border2"
         android:gravity="center"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.49"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView11"
-        app:layout_constraintVertical_bias="1.0">
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true">
 
         <ImageView
             android:layout_width="25dp"
@@ -229,15 +199,13 @@
 
     <LinearLayout
         android:id="@+id/linearResponder"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/border2"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.932"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearMainLayout"
-        app:layout_constraintVertical_bias="0.011">
+        android:layout_below="@+id/linearMainLayout"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp">
 
         <ImageView
             android:layout_width="25dp"
@@ -279,12 +247,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:cardCornerRadius="30dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView7"
-        app:layout_constraintVertical_bias="0.102">
-
+        android:layout_below="@+id/textNoResponders"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp">
         <ImageView
             android:id="@+id/call911"
             android:layout_width="55dp"
@@ -294,32 +259,28 @@
     </androidx.cardview.widget.CardView>
 
     <TextView
-        android:id="@+id/textView7"
+        android:id="@+id/textNoResponders"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="No Responders? Tap the call button to call 911"
         android:textSize="10sp"
         android:textStyle="italic"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView8"
-        app:layout_constraintVertical_bias="0.045" />
+        android:layout_below="@+id/textYouMay"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"/>
 
     <ImageView
         android:id="@+id/rescue"
         android:layout_width="55dp"
         android:layout_height="45dp"
         android:scaleType="fitXY"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView"
-        app:layout_constraintVertical_bias="0.017"
-        app:srcCompat="@drawable/rescue" />
+        app:srcCompat="@drawable/rescue"
+        android:layout_below="@+id/textFireArea"
+        android:layout_marginTop="5dp"
+        android:layout_centerHorizontal="true"/>
 
     <TextView
-        android:id="@+id/textView11"
+        android:id="@+id/textQuote"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -329,29 +290,23 @@
         \n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t- Susan Murphree"
         android:textSize="11dp"
         android:textStyle="italic"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.503"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardView"
-        app:layout_constraintVertical_bias="0.189"
-        tools:ignore="HardcodedText" />
+        tools:ignore="HardcodedText"
+        android:layout_below="@+id/cardView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"/>
 
     <TextView
         android:id="@+id/textView15"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="This application sends location\nof incident reports by a user\nfor firefighters to respond."
+        android:gravity="left"
+        android:text="This application sends location of emergency reports\nby a user for firefighters to respond."
         android:textColor="#939393"
         android:textSize="11sp"
         android:textStyle="italic"
-        app:layout_constraintBottom_toTopOf="@+id/linearResponder"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.681"
-        app:layout_constraintStart_toEndOf="@+id/linearMainLayout"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.516" />
+        android:layout_above="@+id/linearResponder"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="10dp"/>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:id="@+id/coordinatorLayout"
@@ -368,4 +323,4 @@
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</RelativeLayout>

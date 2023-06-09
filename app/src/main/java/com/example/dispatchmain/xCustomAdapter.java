@@ -10,17 +10,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder>
+public class xCustomAdapter extends RecyclerView.Adapter<xCustomAdapter.ViewHolder>
 {
-    public List<DataItem> dataList;
+    public List<zDataItem> dataList;
     public OnItemClickListener listener;
 
     public interface OnItemClickListener
     {
-        void onItemClick(DataItem item);
+        void onItemClick(zDataItem item);
     }
 
-    public CustomAdapter(List<DataItem> dataList, OnItemClickListener listener)
+    public xCustomAdapter(List<zDataItem> dataList, OnItemClickListener listener)
     {
         this.dataList = dataList;
         this.listener = listener;
@@ -37,7 +37,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position)
     {
-        DataItem item = dataList.get(position);
+        zDataItem item = dataList.get(position);
 
         holder.textNameResponder.setText(item.getName());
         holder.textResponderChat.setText(item.getChat());
@@ -73,7 +73,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
 
             if (position != RecyclerView.NO_POSITION)
             {
-                DataItem item = dataList.get(position);
+                zDataItem item = dataList.get(position);
 
                 listener.onItemClick(item);
             }

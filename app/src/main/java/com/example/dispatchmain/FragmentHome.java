@@ -376,6 +376,7 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
         main.findViewById(R.id.respondCheck).setOnClickListener(this);
         main.findViewById(R.id.checkDirectories).setOnClickListener(this);
         main.findViewById(R.id.chooseFromMap).setOnClickListener(this);
+        main.findViewById(R.id.checkProfile).setOnClickListener(this);
 
         linearMainLayout = main.findViewById(R.id.linearMainLayout);
         linearResponder = main.findViewById(R.id.linearResponder);
@@ -677,6 +678,15 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
 
                 bottomSheetCall.setState(BottomSheetBehavior.STATE_EXPANDED);
                 bottomSheetCall.setDraggable(false);
+
+                break;
+            case R.id.checkProfile:
+                FragmentCheckProfile fragmentCheckProfile = new FragmentCheckProfile();
+
+                transaction
+                        .replace(R.id.container, fragmentCheckProfile, "check_fragment")
+                        .addToBackStack(null)
+                        .commit();
 
                 break;
         }

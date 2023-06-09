@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("ALL")
-public class FragmentChat extends Fragment implements CustomAdapter.OnItemClickListener
+public class FragmentChat extends Fragment implements xCustomAdapter.OnItemClickListener
 {
     FirebaseAuth auth = FirebaseAuth.getInstance();
 
@@ -31,9 +31,9 @@ public class FragmentChat extends Fragment implements CustomAdapter.OnItemClickL
 
     RecyclerView chatList;
 
-    private CustomAdapter adapter;
+    private xCustomAdapter adapter;
 
-    private List<DataItem> dataList;
+    private List<zDataItem> dataList;
 
     public FragmentChat()
     {
@@ -86,7 +86,7 @@ public class FragmentChat extends Fragment implements CustomAdapter.OnItemClickL
                                String time = status.child("Time").getValue(String.class);
                                String message = "I am on my way!";
 
-                               dataList.add(new DataItem(Name, message, time, fighterKey));
+                               dataList.add(new zDataItem(Name, message, time, fighterKey));
 
                                adapter.notifyDataSetChanged();
                            }
@@ -116,13 +116,13 @@ public class FragmentChat extends Fragment implements CustomAdapter.OnItemClickL
 
         dataList = new ArrayList<>();
 
-        adapter = new CustomAdapter(dataList, this);
+        adapter = new xCustomAdapter(dataList, this);
 
         chatList.setAdapter(adapter);
     }
 
     @Override
-    public void onItemClick(DataItem item)
+    public void onItemClick(zDataItem item)
     {
         String name = item.getName();
 

@@ -18,7 +18,7 @@ public class FragmentMessage extends Fragment
 
     TextView chatName;
 
-    private List<DataItem> dataList;
+    private List<zDataItem> dataList;
 
     public FragmentMessage()
     {

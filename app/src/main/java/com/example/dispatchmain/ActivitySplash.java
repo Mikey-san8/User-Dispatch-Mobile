@@ -80,7 +80,7 @@ public class ActivitySplash extends AppCompatActivity
                         if(currentUser != null)
                         {
                             String welcome = "Welcome to dispatch.";
-                            String dialogSpeech = "This application sends location of incident reports";
+                            String dialogSpeech = "This application sends location of fire, emergency reports";
                             textToSpeech.speak(welcome + dialogSpeech, TextToSpeech.QUEUE_FLUSH, null, null);
                         }
                     }

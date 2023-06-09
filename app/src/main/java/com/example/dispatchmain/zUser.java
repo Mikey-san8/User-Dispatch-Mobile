@@ -1,14 +1,14 @@
 package com.example.dispatchmain;
 
-public class User {
+public class zUser {
     public String firstName, lastName, email, address, phone, password, userId, userName;
     public double lat;
     public double lng;
 
-    public User() {
+    public zUser() {
     }
 
-    public User(String firstName, String lastName, String email, String address, String phone, String password, String userId, String userName) {
+    public zUser(String firstName, String lastName, String email, String address, String phone, String password, String userId, String userName) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -19,7 +19,7 @@ public class User {
         this.userName = userName;
     }
 
-    public User(double lat, double lng) {
+    public zUser(double lat, double lng) {
         this.lat = lat;
         this.lng = lng;
     }

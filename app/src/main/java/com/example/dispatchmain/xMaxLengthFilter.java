@@ -3,10 +3,10 @@ package com.example.dispatchmain;
 import android.text.InputFilter;
 import android.text.Spanned;
 
-public class MaxLengthFilter implements InputFilter {
+public class xMaxLengthFilter implements InputFilter {
     private int maxLength;
 
-    public MaxLengthFilter(int maxLength) {
+    public xMaxLengthFilter(int maxLength) {
         this.maxLength = maxLength;
     }
 

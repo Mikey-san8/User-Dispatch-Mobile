@@ -85,7 +85,7 @@ public class ActivityRegister extends AppCompatActivity
         String address = typeAddress.getText().toString();
 
         InputFilter[] filters = new InputFilter[]{
-                new MaxLengthFilter(10)
+                new xMaxLengthFilter(10)
         };
         typePhoneNumber.setFilters(filters);
 
@@ -117,7 +117,7 @@ public class ActivityRegister extends AppCompatActivity
                         userId = auth.getCurrentUser().getUid();
                         String userName = "User" + userId;
                         mDatabase = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference();
-                        User user = new User(firstName, lastName, email, address, phone, password, userId, userName);
+                        zUser user = new zUser(firstName, lastName, email, address, phone, password, userId, userName);
                         mDatabase.child("Users").child(userId).setValue(user)
                                 .addOnSuccessListener(aVoid -> Toast.makeText(ActivityRegister.this, "Success", Toast.LENGTH_SHORT).show())
                                 .addOnFailureListener(e -> Toast.makeText(ActivityRegister.this, "Registration Failed", Toast.LENGTH_SHORT).show());
