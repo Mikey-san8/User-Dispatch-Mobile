@@ -26,14 +26,23 @@
         android:drawableEnd="@drawable/pin_location"
         android:drawableTint="#FFFFFF"/>
 
-    <ImageView
-        android:id="@+id/findLocation"
+    <androidx.cardview.widget.CardView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginEnd="10dp"
+        android:layout_marginEnd="20dp"
         android:layout_marginBottom="25dp"
-        app:srcCompat="@drawable/ic_baseline_my_location_24" />
+        app:cardCornerRadius="25dp">
+
+        <ImageView
+            android:id="@+id/findLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            app:srcCompat="@drawable/ic_baseline_my_location_24" />
+
+    </androidx.cardview.widget.CardView>
+
 
 </RelativeLayout>

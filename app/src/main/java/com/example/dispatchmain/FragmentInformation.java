@@ -89,7 +89,7 @@ public class FragmentInformation extends Fragment
                             .commit();
                 }
 
-                ((ActivityMain) requireActivity()).bottomNavigationView.setSelectedItemId(R.id.btmMap);
+                ((U_ActivityMain) requireActivity()).bottomNavigationView.setSelectedItemId(R.id.btmMap);
             }
         });
 
@@ -101,7 +101,27 @@ public class FragmentInformation extends Fragment
                 Fragment main;
                 main = new FragmentHome();
                 navigation = "main";
-                ((ActivityMain) requireActivity()).navigateToFragment(main, navigation);
+                ((U_ActivityMain) requireActivity()).navigateToFragment(main, navigation);
+            }
+        });
+
+        info.findViewById(R.id.tapToView).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                FragmentMap mapFragment = (FragmentMap) getParentFragmentManager().findFragmentByTag("map_fragment");
+
+                FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+
+                if (mapFragment != null)
+                {
+                    transaction
+                            .replace(R.id.container, mapFragment)
+                            .addToBackStack(null)
+                            .commit();
+                }
+
+                ((U_ActivityMain) requireActivity()).bottomNavigationView.setSelectedItemId(R.id.btmMap);
             }
         });
     }

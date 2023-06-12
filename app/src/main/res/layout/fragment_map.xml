@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/maphere"
-    tools:context=".ActivityMain">
+    tools:context=".U_ActivityMain">
 
         <FrameLayout
             android:id="@+id/FrameMap"
@@ -16,31 +16,85 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     tools:layout="@layout/fragment_map_view"
-                    class="com.google.android.gms.maps.SupportMapFragment"
-                    android:layout_alignWithParentIfMissing="true"/>
+                    class="com.google.android.gms.maps.SupportMapFragment" />
+
         </FrameLayout>
 
-        <ImageView
-            android:id="@+id/currentLocation"
-            android:layout_width="55dp"
-            android:layout_height="55dp"
-            android:scaleType="center"
-            app:srcCompat="@drawable/ic_baseline_my_location_24"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardCurrent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true" />
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="25dp"
+            app:cardCornerRadius="25dp">
+
+                <ImageView
+                    android:id="@+id/currentLocation"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:scaleType="fitXY"
+                    android:layout_margin="10dp"
+                    app:srcCompat="@drawable/ic_baseline_my_location_24" />
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardRespond"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@+id/cardCurrent"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="15dp"
+            android:layout_marginEnd="20dp"
+            app:cardCornerRadius="25dp">
+
+                <ImageView
+                    android:id="@+id/seeResponders"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:scaleType="fitXY"
+                    android:layout_margin="10dp"
+                    app:srcCompat="@drawable/responder"
+                    app:tint="#4F175F85" />
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardNearby"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/cardCurrent"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="20dp"
+            android:layout_marginEnd="15dp"
+            app:cardCornerRadius="25dp">
+
+                <ImageView
+                    android:id="@+id/findStations"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:scaleType="fitXY"
+                    android:layout_margin="10dp"
+                    app:srcCompat="@drawable/ic_baseline_fire_extinguisher_24"
+                    app:tint="#FABB9D" />
+
+        </androidx.cardview.widget.CardView>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/layoutSearch"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
-            android:layout_marginEnd="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             app:boxBackgroundColor="#FFFFFF"
-            app:boxCornerRadiusBottomEnd="0dp"
-            app:boxCornerRadiusBottomStart="0dp"
-            app:boxCornerRadiusTopEnd="0dp"
-            app:boxCornerRadiusTopStart="0dp"
+            app:boxCornerRadiusBottomEnd="5dp"
+            app:boxCornerRadiusBottomStart="5dp"
+            app:boxCornerRadiusTopEnd="5dp"
+            app:boxCornerRadiusTopStart="5dp"
             app:endIconDrawable="@drawable/pin_location"
             app:endIconMode="custom"
             app:endIconTint="#FDA7A7"
@@ -57,116 +111,118 @@
                     android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/textTapIcon"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
+            android:layout_centerHorizontal="true"
+            android:text="Tap above icon to go location"
+            android:gravity="center"
+            android:layout_below="@+id/layoutSearch"
+            android:drawablePadding="10dp"
+            android:layout_alignParentEnd="true"
             android:layout_marginTop="5dp"
-            android:layout_marginEnd="200dp"
+            android:layout_marginEnd="23dp"
+            app:drawableEndCompat="@drawable/arrow_up" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardMenu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
             android:layout_below="@+id/layoutSearch"
             android:layout_alignParentStart="true"
-            android:id="@+id/linearFindStation">
+            app:cardCornerRadius="25dp">
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp">
-
-                        <ImageView
-                            android:layout_width="25dp"
-                            android:layout_height="25dp"
-                            android:layout_gravity="center"
-                            app:srcCompat="@drawable/ic_baseline_fire_extinguisher_24" />
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginLeft="10dp"
-                            android:orientation="vertical">
-
-                                <TextView
-                                    android:id="@+id/textFindStations"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Fire Stations Nearby: ..."
-                                    android:textColor="#505050"
-                                    android:textSize="12sp"
-                                    android:textStyle="italic" />
-
-                                <TextView
-                                    android:id="@+id/findStations"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="See Fire Stations"
-                                    android:textColor="#FF5858"
-                                    android:textSize="10sp"
-                                    android:textStyle="bold" />
-
-                        </LinearLayout>
-
-                </LinearLayout>
+                <ImageView
+                    android:id="@+id/mapMenu"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/ic_baseline_menu_24"
+                    android:layout_margin="10dp"
+                    app:tint="#EFB5EC" />
 
         </androidx.cardview.widget.CardView>
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/linearFindStation"
-            android:layout_marginTop="5dp"
-            android:layout_marginStart="5dp"
-            android:layout_marginEnd="200dp"
-            android:id="@+id/linearSeeList">
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="15dp"
+            android:layout_toEndOf="@+id/cardMenu"
+            android:layout_below="@+id/layoutSearch"
+            android:id="@+id/cardStations">
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
+                <RelativeLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dp">
+                    android:layout_margin="5dp">
+
+                        <TextView
+                            android:id="@+id/textFindStations"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Fire Stations Nearby: ..."
+                            android:textColor="#505050"
+                            android:textSize="12sp"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="5dp"/>
 
                         <ImageView
                             android:layout_width="25dp"
                             android:layout_height="25dp"
                             android:layout_gravity="center"
-                            app:srcCompat="@drawable/responder" />
+                            android:layout_alignParentEnd="true"
+                            app:srcCompat="@drawable/ic_baseline_fire_extinguisher_24" />
 
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginLeft="10dp"
-                            android:orientation="vertical">
-
-                                <TextView
-                                    android:id="@+id/textMapResponders"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Responder/s: ..."
-                                    android:textColor="#505050"
-                                    android:textSize="12sp"
-                                    android:textStyle="italic" />
-
-                                <TextView
-                                    android:id="@+id/seeResponders"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="See List"
-                                    android:textColor="#FF5858"
-                                    android:textSize="10sp"
-                                    android:textStyle="bold" />
-
-                        </LinearLayout>
-
-                </LinearLayout>
+                </RelativeLayout>
 
         </androidx.cardview.widget.CardView>
 
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/cardStations"
+            android:layout_toEndOf="@+id/cardMenu"
+            android:layout_marginTop="5dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:id="@+id/cardSeeList">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp">
+
+                        <TextView
+                            android:id="@+id/textMapResponders"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Responder/s: ..."
+                            android:textColor="#505050"
+                            android:textSize="12sp"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="5dp"/>
+
+                        <ImageView
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_alignParentEnd="true"
+                            app:srcCompat="@drawable/responder" />
+
+                </RelativeLayout>
+
+        </androidx.cardview.widget.CardView>
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:id="@+id/coordinatorLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="5dp"
-            android:layout_below="@+id/linearFindStation">
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/cardSeeList">
 
                 <include layout="@layout/bottom_search" />
                 <include layout="@layout/bottom_responders"/>

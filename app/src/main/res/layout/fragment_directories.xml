@@ -1,33 +1,198 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/textView12"
+        android:id="@+id/textDirectory"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_margin="15dp"
+        android:layout_margin="10dp"
+        android:textColor="#5C5C5C"
         android:text="Directories"
-        android:textSize="25sp"/>
+        android:gravity="center"
+        android:textSize="22sp"
+        app:drawableStartCompat="@drawable/ic_baseline_call_24"
+        android:drawablePadding="10dp"/>
 
     <TextView
-        android:id="@+id/textView13"
+        android:id="@+id/textHere"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:text="LIST HERE w/ Click Function" />
+        android:layout_below="@+id/textDirectory"
+        android:layout_marginStart="10dp"
+        android:textColor="#4C4C4C"
+        android:text="Here is the list of available responders nearby." />
 
-    <ImageView
-        android:id="@+id/backToHome"
+    <ListView
+        android:id="@+id/listDirectory"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/textHere"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        style="@style/Widget.AppCompat.Light.ListView.DropDown">
+
+    </ListView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="15dp"
+        app:cardCornerRadius="25dp">
+
+        <ImageView
+            android:id="@+id/infoDirectory"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_margin="7dp"
+            app:srcCompat="@drawable/ic_baseline_info_24"
+            app:tint="#F67171" />
+
+    </androidx.cardview.widget.CardView>
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardAlert"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textDirectory"
+        android:layout_toStartOf="@+id/cardInfo"
+        android:layout_marginTop="5dp"
+        android:layout_marginStart="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|left"
+            android:layout_margin="10dp"
+            android:gravity="left"
+            android:text="HOUSE BILL 10706\nAN ACT PENALIZING PRANK CALLERS TO EMERGENCY HOTLINES:
+            \nSEC. 5 - Prank Calling
+            \n\nEmergency hotlines established for the purpose of
+            \nresponding to emergency situations shall, at all times,
+            \nbe free from receiving unnecessary calls. It shall be prohibited for any individual to make prank calls to any hotline at any time."
+            android:textColor="#000000"
+            android:textSize="12sp"
+            tools:ignore="HardcodedText" />
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardDirectory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textTapDirectory"
+        android:layout_marginStart="50dp"
+        android:layout_marginEnd="50dp"
+        android:layout_marginBottom="10dp">
+
+        <ImageView
+            android:id="@+id/closeDirectory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/close_btn"
+            android:layout_marginBottom="50dp"
+            android:layout_gravity="end"/>
+
+        <TextView
+            android:id="@+id/detailDirectory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TextView\n12123123\nsdfdsfsdf\n234234234\n345345345"
+            android:layout_margin="10dp"
+            android:textColor="#000000"
+            android:layout_gravity="center|left"/>
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardCall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/cardDirectory"
+        android:layout_alignParentEnd="true"
+        android:backgroundTint="#FFB3B3"
+        android:layout_marginEnd="50dp">
+
+        <TextView
+            android:id="@+id/callDirectory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Call"
+            android:layout_margin="5dp"
+            android:textColor="#FFFFFF"
+            android:gravity="center"
+            android:layout_gravity="center|left"
+            android:textSize="12sp"
+            app:drawableStartCompat="@drawable/ic_baseline_call_24"
+            android:drawablePadding="5dp"
+            android:drawableTint="#FFFFFF"/>
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/cardDirectory"
+        android:layout_toStartOf="@+id/cardCall"
+        android:backgroundTint="#FFB3B3"
+        android:layout_marginEnd="10dp">
+
+        <TextView
+            android:id="@+id/chatDirectory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Message"
+            android:layout_margin="5dp"
+            android:textColor="#FFFFFF"
+            android:gravity="center"
+            android:layout_gravity="center|left"
+            android:textSize="12sp"
+            app:drawableStartCompat="@drawable/ic_baseline_chat_24"
+            android:drawablePadding="5dp"
+            android:drawableTint="#FFFFFF"/>
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="25dp"
         android:layout_alignParentBottom="true"
-        app:srcCompat="@drawable/arrow_back"
-        android:layout_margin="15dp"/>
+        android:layout_marginBottom="10dp"
+        android:layout_marginStart="10dp">
+
+        <ImageView
+            android:id="@+id/backDirectory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/arrow_back"
+            android:layout_margin="10dp"/>
+
+    </androidx.cardview.widget.CardView>
+
+
+    <TextView
+        android:id="@+id/textTapDirectory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="Tap an item to view details"
+        android:textColor="#454545"
+        android:gravity="center"
+        android:layout_marginTop="80dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="50dp"
+        app:drawableEndCompat="@drawable/arrow_up"
+        android:drawablePadding="10dp"/>
 
 </RelativeLayout>

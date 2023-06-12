@@ -2,8 +2,10 @@ package com.example.dispatchmain;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.speech.tts.TextToSpeech;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -16,6 +18,12 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,8 +34,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.DecimalFormat;
+import java.util.Locale;
+
 @SuppressWarnings("ALL")
-public class ActivityMain extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener,
+public class U_ActivityMain extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener,
         NavigationView.OnNavigationItemSelectedListener {
 
     FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -38,18 +49,28 @@ public class ActivityMain extends AppCompatActivity implements BottomNavigationV
     FragmentMap mapFragment = new FragmentMap();
     FragmentChat chatFragment = new FragmentChat();
     FragmentEditProfile editFragment = new FragmentEditProfile();
+    FragmentSettings settingsFragment = new FragmentSettings();
 
     BottomNavigationView bottomNavigationView;
 
     public View headerView;
 
     private DrawerLayout drawerLayout;
-    private NavigationView navigationView;
+    public NavigationView navigationView;
 
     public TextView drawerN,
                     drawerE;
 
     private boolean doubleBackToExitPressedOnce = false;
+
+    FirebaseDatabase firebaseDatabase;
+    DatabaseReference databaseReference;
+
+    private FusedLocationProviderClient fusedLocationClient;
+
+    zCalculations calculate = new zCalculations(this);
+
+    TextToSpeech textToSpeech;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -57,16 +78,22 @@ public class ActivityMain extends AppCompatActivity implements BottomNavigationV
         super.onCreate(savedInstanceState);
         setContentView(R.layout.nav_main);
 
-        if (currentUser == null)
-        {
-            Intent intent = new Intent(this, ActivityLogin.class);
-            startActivity(intent);
-            finish();
-            return;
-        }
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         bottomNavigation();
         mainEvents();
+        getNearby();
+
+        textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener()
+        {
+            @Override
+            public void onInit(int status) {
+                if (status != TextToSpeech.ERROR)
+                {
+                    textToSpeech.setLanguage(Locale.UK);
+                }
+            }
+        });
     }
 
     public void mainEvents()
@@ -81,6 +108,106 @@ public class ActivityMain extends AppCompatActivity implements BottomNavigationV
 
         navigationView.setCheckedItem(R.id.nav_home);
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    Boolean getAlarm;
+
+    public void getNearby()
+    {
+        String userId = auth.getCurrentUser().getUid();
+
+        firebaseDatabase = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/");
+        databaseReference = firebaseDatabase.getReference();
+
+        ValueEventListener valueEventListener = new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot)
+            {
+                for(DataSnapshot users:snapshot.child("Users").getChildren())
+                {
+                    String getKey = users.getKey();
+
+                    if(userId.equals(getKey))
+                    {
+                        getAlarm = users.child("Settings").child("alarm").getValue(Boolean.class);
+                    }
+                }
+
+                fusedLocationClient.getLastLocation().addOnCompleteListener(task ->
+                {
+                    if(task.isSuccessful())
+                    {
+                        Location location = task.getResult();
+
+                        for (DataSnapshot Snapshot : snapshot.child("Firefighter").getChildren())
+                        {
+                            if (Snapshot.hasChild("Settings"))
+                            {
+                                Boolean onlineStatus = Snapshot.child("Settings").child("online status").getValue(Boolean.class);
+
+                                if (onlineStatus == true)
+                                {
+                                    Double lat      = Snapshot.child("lat").getValue(Double.class);
+                                    Double lng      = Snapshot.child("lng").getValue(Double.class);
+                                    String userName   = Snapshot.child("userId").getValue(String.class);
+                                    String updatedUserName = null;
+
+                                    if (userName != null && userName.length() > 20)
+                                    {
+                                        updatedUserName = "fighter." + userName.substring(0, userName.length() - 20);
+                                    }
+
+                                    LatLng fighterLocation = new LatLng(lat, lng);
+                                    LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+
+                                    double getDistance = calculate.calculateDistance(fighterLocation, userLocation) / 1000;
+
+                                    DecimalFormat decimalFormat = new DecimalFormat("#.##");
+
+                                    String formattedDistance = decimalFormat.format(getDistance);
+
+                                    String getName  = null;
+
+                                    if (calculate.calculateDistance(fighterLocation, userLocation) < 301
+                                            && calculate.calculateDistance(fighterLocation, userLocation) >= 289)
+                                    {
+                                        Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
+
+                                        if(getAlarm == true)
+                                        {
+//                                            AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
+//                                            builder.setMessage(updatedUserName+" is nearby\nDistance: "+formattedDistance+"km");
+//                                            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener()
+//                                            {
+//                                                @Override
+//                                                public void onClick(DialogInterface dialog, int which)
+//                                                {
+//
+//                                                }
+//                                            });
+//                                            AlertDialog dialog = builder.create();
+//                                            dialog.show();
+
+                                            String speech = "A firefighter is nearby! Distance is " + formattedDistance;
+                                            textToSpeech.speak(speech, TextToSpeech.QUEUE_ADD, null);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error)
+            {
+
+            }
+        };
+
+        databaseReference.addValueEventListener(valueEventListener);
     }
 
     public void bottomNavigation()
@@ -172,12 +299,25 @@ public class ActivityMain extends AppCompatActivity implements BottomNavigationV
                     @Override
                     public void onClick(DialogInterface dialog, int which)
                     {
-                       Toast.makeText(ActivityMain.this, "Thank you for your service!", Toast.LENGTH_LONG).show();
+                       Toast.makeText(U_ActivityMain.this, "Thank you for your service!", Toast.LENGTH_LONG).show();
                     }
                 });
 
                 AlertDialog dialog = builder.create();
                 dialog.show();
+
+                return true;
+            case R.id.nav_settings:
+
+                if(drawerLayout.isDrawerOpen(navigationView))
+                {
+                    drawerLayout.closeDrawer(navigationView, false);
+                }
+
+                transaction
+                        .replace(R.id.container, settingsFragment, "settings_fragment")
+                        .addToBackStack(null)
+                        .commit();
 
                 return true;
         }
@@ -203,7 +343,7 @@ public class ActivityMain extends AppCompatActivity implements BottomNavigationV
             {
 
                 FirebaseAuth.getInstance().signOut();
-                Intent intent = new Intent(ActivityMain.this, ActivityLogin.class);
+                Intent intent = new Intent(U_ActivityMain.this, U_ActivityLogin.class);
                 startActivity(intent);
                 try {
                     finalize();
@@ -218,10 +358,9 @@ public class ActivityMain extends AppCompatActivity implements BottomNavigationV
 
     public void userDetails()
     {
-        FirebaseDatabase firebaseDatabase;
-        DatabaseReference databaseReference;
         firebaseDatabase = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/");
         databaseReference = firebaseDatabase.getReference();
+
         String userId = auth.getCurrentUser().getUid();
 
         databaseReference.addValueEventListener(new ValueEventListener()
@@ -294,22 +433,58 @@ public class ActivityMain extends AppCompatActivity implements BottomNavigationV
     @Override
     public void onBackPressed()
     {
-        if (doubleBackToExitPressedOnce)
+        if(drawerLayout.isDrawerOpen(navigationView))
         {
-            System.exit(0);
-            return;
+            drawerLayout.closeDrawer(navigationView, false);
         }
-
-        this.doubleBackToExitPressedOnce = true;
-        Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show();
-
-        new Handler().postDelayed(new Runnable()
+        else
         {
-            @Override
-            public void run()
+            if (doubleBackToExitPressedOnce)
             {
-                doubleBackToExitPressedOnce = false;
+                System.exit(0);
+                return;
             }
-        }, 2000);
+
+            this.doubleBackToExitPressedOnce = true;
+
+            Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show();
+
+            new Handler().postDelayed(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    doubleBackToExitPressedOnce = false;
+                }
+            }, 2000);
+        }
+    }
+
+    private final LocationCallback locationCallback = new LocationCallback()
+    {
+        @Override
+        public void onLocationResult(LocationResult locationResult)
+        {
+            Location location = locationResult.getLastLocation();
+        }
+    };
+
+    @Override
+    protected void onStart()
+    {
+        super.onStart();
+        LocationRequest locationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(10000)
+                .setFastestInterval(5000);
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+    }
+
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+
+        fusedLocationClient.removeLocationUpdates(locationCallback);
     }
 }

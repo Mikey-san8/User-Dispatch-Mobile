@@ -100,7 +100,8 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
 
     public ImageView    blinkBtn,
                         blinkBtn2,
-                        blinkBtn3;
+                        blinkBtn3,
+                        sendButton;
 
     private CardView callButton;
 
@@ -137,10 +138,6 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
     private ArrayAdapter<String> pAdapter;
 
     DateFormat dateFormat;
-    String latitude;
-    String longitude;
-
-    Boolean stop = false;
 
     ValueEventListener valueEventListener;
 
@@ -148,9 +145,27 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
 
     public Boolean isDialogShown = false;
 
+    FirebaseDatabase firebaseDatabase;
+    DatabaseReference databaseReference;
+
+    Boolean settingSpeech,
+            settingBgService,
+            settingAlarm,
+            settingAnonymous;
+
+    String userAnonymous;
+
+    zCalculations calculate;
+
     public FragmentHome()
     {
 
+    }
+
+    public void gotoDrawer()
+    {
+        ((U_ActivityMain) getActivity()).bottomNavigationView.setSelectedItemId(R.id.btmMenu);
+        ((U_ActivityMain) getActivity()).navigationView.setCheckedItem(R.id.nav_home);
     }
 
     @Override
@@ -343,51 +358,59 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
 
     public void setEvents()
     {
+        calculate = new zCalculations(main.getContext());
+
         endIcon();
 
-        callButton = main.findViewById(R.id.cardView);
+        callButton      = main.findViewById(R.id.cardView);
 
-        userN = main.findViewById(R.id.nameHere);
-        userP = main.findViewById(R.id.phoneHere);
-        userA = main.findViewById(R.id.addressHere);
-        userL = main.findViewById(R.id.currentLocHere);
+        userN           = main.findViewById(R.id.nameHere);
+        userP           = main.findViewById(R.id.phoneHere);
+        userA           = main.findViewById(R.id.addressHere);
+        userL           = main.findViewById(R.id.currentLocHere);
+
         whenTyping();
-        userC = main.findViewById(R.id.commentBox);
 
-        accountN = main.findViewById(R.id.accounName);
-        accountE = main.findViewById(R.id.accountEmail);
+        userC           = main.findViewById(R.id.commentBox);
 
-        blinkBtn = main.findViewById(R.id.blink_btn);
-        blinkBtn2 = main.findViewById(R.id.shadow);
-        blinkBtn3 = main.findViewById(R.id.fire_btn2);
+        accountN        = main.findViewById(R.id.accounName);
+        accountE        = main.findViewById(R.id.accountEmail);
+
+        blinkBtn        = main.findViewById(R.id.blink_btn);
+        blinkBtn2       = main.findViewById(R.id.shadow);
+        blinkBtn3       = main.findViewById(R.id.fire_btn2);
+
+        sendButton      = main.findViewById(R.id.sendButton);
+
         blinking();
 
-        blinkBtn3.setOnClickListener(this);
+        blinkBtn3       .setOnClickListener(this);
+        sendButton      .setOnClickListener(this);
 
-        textAvailable = main.findViewById(R.id.textAvailable);
-        textResponders = main.findViewById(R.id.textResponders);
+        textAvailable   = main.findViewById(R.id.textAvailable);
+        textResponders  = main.findViewById(R.id.textResponders);
 
-        helloName = main.findViewById(R.id.helloName);
+        helloName       = main.findViewById(R.id.helloName);
 
-        main.findViewById(R.id.sendButton).setOnClickListener(this);
-        main.findViewById(R.id.checkOnMap).setOnClickListener(this);
-        main.findViewById(R.id.seeLocation).setOnClickListener(this);
-        main.findViewById(R.id.cardView).setOnClickListener(this);
-        main.findViewById(R.id.respondCheck).setOnClickListener(this);
-        main.findViewById(R.id.checkDirectories).setOnClickListener(this);
-        main.findViewById(R.id.chooseFromMap).setOnClickListener(this);
-        main.findViewById(R.id.checkProfile).setOnClickListener(this);
+        main            .findViewById(R.id.checkOnMap)          .setOnClickListener(this);
+        main            .findViewById(R.id.seeLocation)         .setOnClickListener(this);
+        main            .findViewById(R.id.cardView)            .setOnClickListener(this);
+        main            .findViewById(R.id.respondCheck)        .setOnClickListener(this);
+        main            .findViewById(R.id.checkDirectories)    .setOnClickListener(this);
+        main            .findViewById(R.id.chooseFromMap)       .setOnClickListener(this);
+        main            .findViewById(R.id.checkProfile)        .setOnClickListener(this);
+        main            .findViewById(R.id.arrowDown)           .setOnClickListener(this);
 
-        linearMainLayout = main.findViewById(R.id.linearMainLayout);
-        linearResponder = main.findViewById(R.id.linearResponder);
-        linearForms = main.findViewById(R.id.linearForms);
+        linearMainLayout    = main.findViewById(R.id.linearMainLayout);
+        linearResponder     = main.findViewById(R.id.linearResponder);
+        linearForms         = main.findViewById(R.id.linearForms);
 
-        bottomSheetView = main.findViewById(R.id.fireCallSheet);
-        bottomSheetCall = BottomSheetBehavior.from(bottomSheetView);
+        bottomSheetView     = main.findViewById(R.id.fireCallSheet);
+        bottomSheetCall     = BottomSheetBehavior.from(bottomSheetView);
 
-        placeList = main.findViewById(R.id.listPlace);
+        placeList = main    .findViewById(R.id.listPlace);
 
-        placeList.setOnScrollListener(new AbsListView.OnScrollListener()
+        placeList           .setOnScrollListener(new AbsListView.OnScrollListener()
         {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState)
@@ -412,15 +435,13 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
             }
         });
 
-        placeList.setOnItemClickListener(this);
+        placeList       .setOnItemClickListener(this);
 
-        pArray = new ArrayList<>();
+        pArray          = new ArrayList<>();
+        pAdapter        = new ArrayAdapter<>(getContext(), R.layout.list_place, R.id.placeList, pArray);
+        placeList       .setAdapter(pAdapter);
 
-        pAdapter = new ArrayAdapter<>(getContext(), R.layout.list_place, R.id.placeList, pArray);
-
-        placeList.setAdapter(pAdapter);
-
-        bottomSheetCall.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback()
+        bottomSheetCall .setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback()
         {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState)
@@ -478,12 +499,12 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
 
     public void endIcon()
     {
-        nameLay = main.findViewById(R.id.nameLayout);
-        phoneLay = main.findViewById(R.id.phoneLayout);
-        addressLay = main.findViewById(R.id.addressLayout);
-        locationLay = main.findViewById(R.id.currentLocLayout);
+        nameLay         = main.findViewById(R.id.nameLayout);
+        phoneLay        = main.findViewById(R.id.phoneLayout);
+        addressLay      = main.findViewById(R.id.addressLayout);
+        locationLay     = main.findViewById(R.id.currentLocLayout);
 
-        nameLay.setEndIconOnClickListener(new View.OnClickListener()
+        nameLay         .setEndIconOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
@@ -492,7 +513,7 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
             }
         });
 
-        phoneLay.setEndIconOnClickListener(new View.OnClickListener() {
+        phoneLay        .setEndIconOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)
             {
@@ -500,7 +521,7 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
             }
         });
 
-        addressLay.setEndIconOnClickListener(new View.OnClickListener() {
+        addressLay      .setEndIconOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)
             {
@@ -508,7 +529,7 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
             }
         });
 
-        locationLay.setEndIconOnClickListener(new View.OnClickListener() {
+        locationLay     .setEndIconOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)
             {
@@ -551,9 +572,12 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
 
                     placeName(main.getContext(), mLocation.getLatitude(), mLocation.getLongitude(), holderName);
 
-                    String emergencyButton = "You may change the details or leave it as be. Don't forget to send your report.";
+                    if(settingSpeech == true)
+                    {
+                        String emergencyButton = "You may change the details or leave it as be. Don't forget to send your report.";
 
-                    textToSpeech.speak(emergencyButton, TextToSpeech.QUEUE_ADD, null, null);
+                        textToSpeech.speak(emergencyButton, TextToSpeech.QUEUE_ADD, null, null);
+                    }
                 }
                 else
                 {
@@ -580,9 +604,14 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
 
                 break;
             case R.id.sendButton:
-                String checkDetails = "Please check your details then send. After sending, wait for a nearby firefighter to respond to your incident location.";
 
-                textToSpeech.speak(checkDetails, TextToSpeech.QUEUE_ADD, null, null);
+                if(settingSpeech == true)
+                {
+                    String checkDetails = "Please check your details then send. After sending, wait for a nearby firefighter to respond to your incident location.";
+
+                    textToSpeech.speak(checkDetails, TextToSpeech.QUEUE_ADD, null, null);
+                }
+
                 send();
                 break;
             case R.id.respondCheck:
@@ -592,7 +621,7 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
                 if(textCurrent != null)
                 {
                     Toast.makeText(requireContext(), "Location Detected", Toast.LENGTH_SHORT).show();
-                    ((ActivityMain) getActivity()).navigateToFragment(fragment, navigation);
+                    ((U_ActivityMain) getActivity()).navigateToFragment(fragment, navigation);
                 }
                 else
                 {
@@ -606,7 +635,7 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
                 if(textCurrent != null)
                 {
                     Toast.makeText(requireContext(), "Location Detected", Toast.LENGTH_SHORT).show();
-                    ((ActivityMain) getActivity()).navigateToFragment(fragment, navigation);
+                    ((U_ActivityMain) getActivity()).navigateToFragment(fragment, navigation);
                 }
                 else
                 {
@@ -621,7 +650,7 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
                 if(textCurrent != null)
                 {
                     Toast.makeText(requireContext(), "Location Detected", Toast.LENGTH_SHORT).show();
-                    ((ActivityMain) getActivity()).navigateToFragment(fragment, navigation);
+                    ((U_ActivityMain) getActivity()).navigateToFragment(fragment, navigation);
                 }
                 else
                 {
@@ -688,6 +717,9 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
                         .addToBackStack(null)
                         .commit();
 
+                break;
+            case R.id.arrowDown:
+                bottomSheetCall.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 break;
         }
     }
@@ -765,9 +797,13 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
             @Override
             public void onClick(DialogInterface dialog, int which)
             {
-                String sendingReport = "You are now sending the report.";
-                String checkIntruction = "Please be safe and stay calm. You may check further instructions by tapping the directories.";
-                textToSpeech.speak(sendingReport + checkIntruction, TextToSpeech.QUEUE_ADD, null, null);
+                if(settingSpeech == true)
+                {
+                    String sendingReport = "You are now sending the report.";
+                    String checkIntruction = "Please be safe and stay calm. You may check further instructions by tapping the directories.";
+                    textToSpeech.speak(sendingReport + checkIntruction, TextToSpeech.QUEUE_ADD, null, null);
+                }
+
                 Fragment information;
 
                 Bundle bundle = new Bundle();
@@ -820,9 +856,13 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
                             @Override
                             public void onFinish()
                             {
-                                ((ActivityMain) getActivity()).navigateToFragment(information, navigation);
-                                textToSpeech.speak("This is your information. You may now view the map, for monitoring",
-                                        TextToSpeech.QUEUE_ADD, null, null);
+                                ((U_ActivityMain) getActivity()).navigateToFragment(information, navigation);
+                                if(settingSpeech == true)
+                                {
+                                    textToSpeech.speak("This is your information. You may now view the map, for monitoring",
+                                            TextToSpeech.QUEUE_ADD, null, null);
+                                }
+
                             }
                         }.start();
                     }
@@ -849,9 +889,10 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
         Animation zoomInAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_in);
         Animation zoomOutAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_out);
 
-        blinkBtn.startAnimation(zoomInAnimation);
-        blinkBtn2.startAnimation(anim2);
-//        blinkBtn3.startAnimation(anim);
+        blinkBtn    .startAnimation(zoomInAnimation);
+        blinkBtn2   .startAnimation(anim2);
+        sendButton  .startAnimation(anim);
+
     }
 
 
@@ -872,7 +913,7 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
             public void onClick(DialogInterface dialog, int which)
             {
                 FirebaseAuth.getInstance().signOut();
-                Intent intent = new Intent(main.getContext(), ActivityLogin.class);
+                Intent intent = new Intent(main.getContext(), U_ActivityLogin.class);
                 startActivity(intent);
                 getActivity().getFragmentManager().popBackStack();
             }
@@ -906,8 +947,6 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
     {
         String userId = auth.getCurrentUser().getUid();
 
-        FirebaseDatabase firebaseDatabase;
-        DatabaseReference databaseReference;
         firebaseDatabase = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/");
         databaseReference = firebaseDatabase.getReference();
 
@@ -922,6 +961,16 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
                 String email =  snapshot.child("Users").child(userId).child("email").getValue(String.class);
                 String phone = snapshot.child("Users").child(userId).child("phone").getValue(String.class);
                 String address = snapshot.child("Users").child(userId).child("address").getValue(String.class);
+
+                Boolean vTextToSpeech = snapshot.child("Users").child(userId).child("Settings").child("text to speech").getValue(Boolean.class);
+                Boolean vBackgroundService = snapshot.child("Users").child(userId).child("Settings").child("background service").getValue(Boolean.class);
+                Boolean vAlarm = snapshot.child("Users").child(userId).child("Settings").child("alarm").getValue(Boolean.class);
+                Boolean vSendAnonymous = snapshot.child("Users").child(userId).child("Settings").child("send anonymous").getValue(Boolean.class);
+
+                settingSpeech       = vTextToSpeech;
+                settingBgService    = vBackgroundService;
+                settingAlarm        = vAlarm;
+                settingAnonymous    = vSendAnonymous;
 
                 userN.setText(firstName + " " + lastName);
                 userP.setText(phone);
@@ -948,10 +997,9 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
         String userId = auth.getCurrentUser().getUid();
 
         List<String> countr = new ArrayList<>();
+
         List<String> responderCounter = new ArrayList<>();
 
-        FirebaseDatabase firebaseDatabase;
-        DatabaseReference databaseReference;
         firebaseDatabase = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/");
         databaseReference = firebaseDatabase.getReference();
 
@@ -978,9 +1026,9 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
 
                         for (DataSnapshot Snapshot: snapshot.child("Firefighter").getChildren())
                         {
-                            if(Snapshot.hasChild("online status"))
+                            if(Snapshot.hasChild("Settings"))
                             {
-                                Boolean onlineStatus = Snapshot.child("online status").getValue(Boolean.class);
+                                Boolean onlineStatus = Snapshot.child("Settings").child("online status").getValue(Boolean.class);
 
                                 if(onlineStatus == true)
                                 {
@@ -990,13 +1038,13 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
                                     LatLng fighterLocation = new LatLng(lat, lng);
                                     LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
 
-                                    if( calculateDistance(fighterLocation, userLocation) < 7001)
+                                    if(calculate.calculateDistance(fighterLocation, userLocation) < 7001)
                                     {
-                                        countr.add(String.valueOf(fighterLocation));
-                                    }
+                                        countr.add(String.valueOf(onlineStatus));
 
-                                    String responder = String.valueOf(countr.size());
-                                    textAvailable.setText("Available responder/s: " + responder);
+                                        String responder = String.valueOf(countr.size());
+                                        textAvailable.setText("Available responder/s: " + responder);
+                                    }
                                 }
                                 else
                                 {
@@ -1080,6 +1128,8 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
         dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault());
         String timeDate = dateFormat.format(new Date());
 
+
+
         Map<String, Object> report = new HashMap<>();
         report.put("FullName", name);
         report.put("MobileNumber", phone);
@@ -1089,8 +1139,6 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
         report.put("Date & Time", timeDate);
         report.put("TimeStamp", currentTime);
 
-        FirebaseDatabase firebaseDatabase;
-        DatabaseReference databaseReference;
         firebaseDatabase = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/");
         databaseReference = firebaseDatabase.getReference();
 
@@ -1103,48 +1151,6 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
     {
         InputMethodManager inputMethodManager =(InputMethodManager)getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
-    }
-
-    public LatLng getCalculations(String placeName, String ID)
-    {
-        Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
-        List<Address> addresses = null;
-        try
-        {
-            addresses = geocoder.getFromLocationName(placeName, 1);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        if (addresses != null && addresses.size() > 0)
-        {
-            Address address = addresses.get(0);
-            double latitude = address.getLatitude();
-            double longitude = address.getLongitude();
-
-            LatLng distance = new LatLng(latitude, longitude);
-
-            return distance;
-        }
-
-        return null;
-    }
-
-    private double calculateDistance(LatLng loc1, LatLng loc2)
-    {
-        Location startPoint=new Location("locationA");
-        startPoint.setLatitude(loc1.latitude);
-        startPoint.setLongitude(loc1.longitude);
-
-        Location endPoint=new Location("locationA");
-        endPoint.setLatitude(loc2.latitude);
-        endPoint.setLongitude(loc2.longitude);
-
-        double distance=startPoint.distanceTo(endPoint);
-
-        return distance;
     }
 
     public void showAddress()

@@ -1,31 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".ActivityMain">
+    tools:context=".U_ActivityMain">
 
     <ImageView
         android:id="@+id/recordClose"
         android:layout_width="35dp"
         android:layout_height="35dp"
         app:srcCompat="@drawable/close_btn"
-        android:layout_gravity="right"
+        android:layout_alignParentEnd="true"
         android:layout_margin="15dp"/>
 
     <LinearLayout
         android:id="@+id/linearMainLayout"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
         android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/imageView4"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_marginLeft="10dp"
             app:srcCompat="@drawable/fighter" />
 
@@ -42,30 +43,31 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="top|left"
                 android:text="REPORT INFORMATION"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:textStyle="italic" />
 
             <TextView
                 android:id="@+id/deleteReport"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Delete Sent Report"
+                android:text="Showing Sent Report"
                 android:textColor="#FF5858"
-                android:textSize="15sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
         </LinearLayout>
+
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/linearInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
-        android:layout_marginLeft="15dp"
-        android:layout_marginRight="15dp"
-        android:background="@drawable/border2">
+        android:layout_below="@+id/linearMainLayout"
+        android:background="@drawable/border2"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp">
 
         <TextView
             android:id="@+id/infoN"
@@ -73,9 +75,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Name"
-
             android:textStyle="italic"
-            android:textSize="18sp"/>
+            android:textSize="12sp"/>
 
         <TextView
             android:id="@+id/infoName"
@@ -84,19 +85,8 @@
             android:drawableStart="@drawable/person"
             android:drawablePadding="5dp"
             android:text="Your Name Here"
-            android:textSize="20sp"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/border2"
-        android:orientation="vertical"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
-        android:layout_marginLeft="15dp"
-        android:layout_marginRight="15dp">
+            android:layout_marginBottom="20dp"
+            android:textSize="16sp"/>
 
         <TextView
             android:id="@+id/infoP"
@@ -105,7 +95,7 @@
             android:layout_height="wrap_content"
             android:text="Mobile Number"
             android:textStyle="italic"
-            android:textSize="18sp"/>
+            android:textSize="12sp"/>
 
         <TextView
             android:id="@+id/infoPhone"
@@ -113,20 +103,9 @@
             android:layout_height="wrap_content"
             android:text="Your Mobile Number Here"
             android:drawableStart="@drawable/phone"
+            android:layout_marginBottom="20dp"
             android:drawablePadding="5dp"
-            android:textSize="20sp"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/border2"
-        android:orientation="vertical"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
-        android:layout_marginLeft="15dp"
-        android:layout_marginRight="15dp">
+            android:textSize="16sp"/>
 
         <TextView
             android:id="@+id/infoA"
@@ -135,7 +114,7 @@
             android:text="Home Address"
             android:textColor="#BABABA"
             android:textStyle="italic"
-            android:textSize="18sp"/>
+            android:textSize="12sp"/>
 
         <TextView
             android:id="@+id/infoAddress"
@@ -143,20 +122,9 @@
             android:layout_height="wrap_content"
             android:text="Your Address Here"
             android:drawableStart="@drawable/address"
+            android:layout_marginBottom="20dp"
             android:drawablePadding="5dp"
-            android:textSize="20sp"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/border2"
-        android:orientation="vertical"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
-        android:layout_marginLeft="15dp"
-        android:layout_marginRight="15dp">
+            android:textSize="16sp"/>
 
         <TextView
             android:id="@+id/infoL"
@@ -165,7 +133,7 @@
             android:text="Incident Location"
             android:textStyle="italic"
             android:textColor="#BABABA"
-            android:textSize="18sp"/>
+            android:textSize="12sp"/>
 
         <TextView
             android:id="@+id/infoLocation"
@@ -174,19 +142,8 @@
             android:text="Your Location Here"
             android:drawableStart="@drawable/ic_baseline_my_location_24"
             android:drawablePadding="5dp"
-            android:textSize="20sp"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/border2"
-        android:orientation="vertical"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
-        android:layout_marginLeft="15dp"
-        android:layout_marginRight="15dp">
+            android:layout_marginBottom="20dp"
+            android:textSize="16sp"/>
 
         <TextView
             android:id="@+id/infoC"
@@ -195,7 +152,7 @@
             android:text="Comment/Note"
             android:textStyle="italic"
             android:textColor="#BABABA"
-            android:textSize="18sp"/>
+            android:textSize="12sp"/>
 
         <TextView
             android:id="@+id/infoComment"
@@ -203,15 +160,18 @@
             android:layout_height="wrap_content"
             android:text="Your Comment Here"
             android:drawablePadding="5dp"
-            android:textSize="20sp"/>
+            android:textSize="16sp"/>
 
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/linearDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginTop="20dp">
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:layout_below="@+id/linearInfo">
 
         <TextView
             android:id="@+id/infoD"
@@ -234,21 +194,33 @@
 
     </LinearLayout>
 
-
-    <TextView
-        android:id="@+id/textView10"
-        android:layout_width="match_parent"
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textStyle="italic"
-        android:textColor="#BABABA"
-        android:gravity="center"
-        android:text="Tap To View Map"
-        android:layout_marginTop="30dp"/>
+        android:layout_below="@+id/linearDate"
+        android:layout_centerHorizontal="true">
+
+        <TextView
+            android:id="@+id/tapToView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="15dp"
+            android:textColor="#717171"
+            android:gravity="center"
+            android:text="Tap to view map"
+            android:drawablePadding="5dp"
+            app:drawableEndCompat="@drawable/ic_baseline_map_24"
+            android:drawableTint="#FFC3C3"/>
+
+    </androidx.cardview.widget.CardView>
+
 
     <FrameLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_gravity="bottom">
+        android:id="@+id/frameGoToMap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true">
 
     <ImageView
         android:id="@+id/infoGotoMap"
@@ -270,4 +242,4 @@
 </FrameLayout>
 
 
-</LinearLayout>
+</RelativeLayout>

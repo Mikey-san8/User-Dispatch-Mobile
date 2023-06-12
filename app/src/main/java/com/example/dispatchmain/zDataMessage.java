@@ -1,15 +1,16 @@
 package com.example.dispatchmain;
 
-public class zDataItem
+public class zDataMessage
 {
-    private String name, chat, time, key;
+    private String name, chat, time, key, sender;
 
-    public zDataItem(String name, String chat, String time, String key)
+    public zDataMessage(String name, String chat, String time, String key, String sender)
     {
         this.name = name;
         this.chat = chat;
         this.time = time;
         this.key = key;
+        this.sender = sender;
     }
 
     public String getName() {
@@ -32,5 +33,9 @@ public class zDataItem
     public String getKey()
     {
         return key;
+    }
+
+    public String getSender() {
+        return sender;
     }
 }

@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class xCustomAdapter extends RecyclerView.Adapter<xCustomAdapter.ViewHolder>
+public class xChatAdapter extends RecyclerView.Adapter<xChatAdapter.ViewHolder>
 {
     public List<zDataItem> dataList;
     public OnItemClickListener listener;
@@ -20,7 +20,7 @@ public class xCustomAdapter extends RecyclerView.Adapter<xCustomAdapter.ViewHold
         void onItemClick(zDataItem item);
     }
 
-    public xCustomAdapter(List<zDataItem> dataList, OnItemClickListener listener)
+    public xChatAdapter(List<zDataItem> dataList, OnItemClickListener listener)
     {
         this.dataList = dataList;
         this.listener = listener;
@@ -41,7 +41,13 @@ public class xCustomAdapter extends RecyclerView.Adapter<xCustomAdapter.ViewHold
 
         holder.textNameResponder.setText(item.getName());
         holder.textResponderChat.setText(item.getChat());
-        holder.textTimeChat.setText(item.getTime());
+
+        String time = item.getTime();
+        if (time.length() > 3) {
+            time = time.substring(0, time.length() - 3);
+        }
+        holder.textTimeChat.setText(time);
+
     }
 
     @Override
@@ -59,11 +65,12 @@ public class xCustomAdapter extends RecyclerView.Adapter<xCustomAdapter.ViewHold
         public ViewHolder(@NonNull View itemView)
         {
             super(itemView);
-            textNameResponder = itemView.findViewById(R.id.textNameResponder);
-            textResponderChat = itemView.findViewById(R.id.textResponderChat);
-            textTimeChat = itemView.findViewById(R.id.textTimeChat);
 
-            itemView.setOnClickListener(this);
+            textNameResponder   = itemView.findViewById(R.id.textNameResponder);
+            textResponderChat   = itemView.findViewById(R.id.textResponderChat);
+            textTimeChat        = itemView.findViewById(R.id.textTimeChat);
+
+            itemView            .setOnClickListener(this);
         }
 
         @Override

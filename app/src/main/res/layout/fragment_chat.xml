@@ -49,8 +49,11 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/listChat"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/linearEmergency"/>
+        android:layout_height="match_parent"
+        android:layout_below="@+id/linearEmergency"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginStart="20dp"/>
 
     <androidx.cardview.widget.CardView
         android:layout_width="wrap_content"
@@ -65,14 +68,14 @@
             android:id="@+id/startChat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Start Chat"
+            android:text="Select from the list to start chat"
             android:gravity="center"
-            android:textColor="#9A9A9A"
-            android:textSize="16sp"
+            android:textColor="#7C7C7C"
+            android:textSize="11sp"
             app:drawableTint="#FF9C9C"
-            android:padding="15dp"
+            android:layout_margin="8dp"
             android:drawablePadding="10dp"
-            app:drawableStartCompat="@drawable/ic_baseline_chat_24" />
+            app:drawableEndCompat="@drawable/ic_baseline_chat_24" />
 
     </androidx.cardview.widget.CardView>
 

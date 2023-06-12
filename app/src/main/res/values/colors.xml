@@ -9,4 +9,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="text_color">#FFFF5858</color>
     <color name="LineDirection">#FF7676</color>
+    <color name="textColor">#C3B668</color>
 </resources>

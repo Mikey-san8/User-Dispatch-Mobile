@@ -6,6 +6,10 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -17,7 +21,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -134,7 +141,8 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
 
     public View map;
 
-    ImageView currentClick;
+    ImageView   findStations,
+                mapMenu;
 
     Circle userLocationAccuracyCircle;
 
@@ -153,11 +161,22 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
     private Polyline polyline = null;
 
     EditText search;
+
     TextInputLayout searchLayout;
 
     TextView    textMapResponders,
                 textFindStations,
-                findStations;
+                textTapIcon;
+
+    CardView    cardNearby,
+                cardRespond,
+                cardCurrent,
+                cardSeeList,
+                cardStations;
+
+    Drawable currentDrawable;
+
+    Bitmap currentBitmap;
 
     public FragmentMap()
     {
@@ -205,53 +224,59 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
 
     public void events()
     {
-        textMapResponders = map.findViewById(R.id.textMapResponders);
-        textFindStations = map.findViewById(R.id.textFindStations);
-        findStations = map.findViewById(R.id.findStations);
+        textMapResponders       = map.findViewById(R.id.textMapResponders);
+        textFindStations        = map.findViewById(R.id.textFindStations);
 
-        search = map.findViewById(R.id.searchPlace);
+        textTapIcon             = map.findViewById(R.id.textTapIcon);
+        textTapIcon             .setVisibility(View.INVISIBLE);
 
-        map.findViewById(R.id.currentLocation).setOnClickListener(this);
-        map.findViewById(R.id.seeResponders).setOnClickListener(this);
+        findStations            = map.findViewById(R.id.findStations);
 
-        searhPlace = map.findViewById(R.id.listSearch);
-        responderList = map.findViewById(R.id.listResponders);
+        cardNearby              = map.findViewById(R.id.cardNearby);
+        cardRespond             = map.findViewById(R.id.cardRespond);
+        cardCurrent             = map.findViewById(R.id.cardCurrent);
+        cardSeeList             = map.findViewById(R.id.cardSeeList);
+        cardStations            = map.findViewById(R.id.cardStations);
 
-        searhPlace.setOnItemClickListener(this);
-        responderList.setOnItemClickListener(this);
+        cardSeeList             .setVisibility(View.INVISIBLE);
+        cardStations            .setVisibility(View.INVISIBLE);
 
-        searchLayout = map.findViewById(R.id.layoutSearch);
+        search                  = map.findViewById(R.id.searchPlace);
 
-        bottomSheetView = map.findViewById(R.id.searchSheet);
-        bottomSheetSearch = BottomSheetBehavior.from(bottomSheetView);
+        mapMenu                 = map.findViewById(R.id.mapMenu);
 
-        responderView = map.findViewById(R.id.sheetResponders);
-        bottomResponders = BottomSheetBehavior.from(responderView);
+        currentDrawable         = mapMenu.getDrawable();
+        currentBitmap           = drawableToBitmap(currentDrawable);
 
-        placeArray = new ArrayList<>();
-        responderArray = new ArrayList<>();
+        mapMenu                 .setOnClickListener(this);
 
-        placeAdapter = new ArrayAdapter<>(getContext(), R.layout.list_search, R.id.searchList, placeArray);
-        responderAdapter = new ArrayAdapter<>(getContext(), R.layout.list_responder, R.id.adapterResponders, responderArray);
+        map                     .findViewById(R.id.currentLocation) .setOnClickListener(this);
+        map                     .findViewById(R.id.seeResponders)   .setOnClickListener(this);
 
-        searhPlace.setAdapter(placeAdapter);
-        responderList.setAdapter(responderAdapter);
+        searhPlace              = map.findViewById(R.id.listSearch);
+        responderList           = map.findViewById(R.id.listResponders);
 
-        bottomSheetSearch.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+        searhPlace              .setOnItemClickListener(this);
+        responderList           .setOnItemClickListener(this);
 
-            }
+        searchLayout            = map.findViewById(R.id.layoutSearch);
 
-            @Override
-            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+        bottomSheetView         = map.findViewById(R.id.searchSheet);
+        bottomSheetSearch       = BottomSheetBehavior.from(bottomSheetView);
 
-            }
-        });
+        responderView           = map.findViewById(R.id.sheetResponders);
+        bottomResponders        = BottomSheetBehavior.from(responderView);
 
-        CardView seeList = map.findViewById(R.id.linearSeeList);
+        placeArray              = new ArrayList<>();
+        responderArray          = new ArrayList<>();
 
-        bottomResponders.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+        placeAdapter            = new ArrayAdapter<>(getContext(), R.layout.list_search, R.id.searchList, placeArray);
+        responderAdapter        = new ArrayAdapter<>(getContext(), R.layout.list_responder, R.id.adapterResponders, responderArray);
+
+        searhPlace              .setAdapter(placeAdapter);
+        responderList           .setAdapter(responderAdapter);
+
+        bottomSheetSearch       .setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState)
             {
@@ -262,7 +287,11 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
                         break;
                     case BottomSheetBehavior.STATE_EXPANDED:
                     {
-                        seeList.setVisibility(View.INVISIBLE);
+                        cardNearby      .setVisibility(View.INVISIBLE);
+                        cardRespond     .setVisibility(View.INVISIBLE);
+                        cardCurrent     .setVisibility(View.INVISIBLE);
+
+                        textTapIcon     .setVisibility(View.VISIBLE);
                     }
                     break;
                     case BottomSheetBehavior.STATE_DRAGGING:
@@ -279,7 +308,56 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
                     break;
                     case BottomSheetBehavior.STATE_COLLAPSED:
                     {
-                        seeList.setVisibility(View.VISIBLE);
+                        cardNearby      .setVisibility(View.VISIBLE);
+                        cardRespond     .setVisibility(View.VISIBLE);
+                        cardCurrent     .setVisibility(View.VISIBLE);
+
+                        textTapIcon     .setVisibility(View.INVISIBLE);
+                    }
+                    break;
+                }
+
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+
+            }
+        });
+
+        bottomResponders        .setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState)
+            {
+                switch (newState)
+                {
+                    case BottomSheetBehavior.STATE_HIDDEN:
+
+                        break;
+                    case BottomSheetBehavior.STATE_EXPANDED:
+                    {
+                        cardNearby      .setVisibility(View.INVISIBLE);
+                        cardRespond     .setVisibility(View.INVISIBLE);
+                        cardCurrent     .setVisibility(View.INVISIBLE);
+                    }
+                    break;
+                    case BottomSheetBehavior.STATE_DRAGGING:
+                    {
+
+                    }
+                    break;
+                    case BottomSheetBehavior.STATE_SETTLING:
+
+                    case BottomSheetBehavior.STATE_HALF_EXPANDED:
+                    {
+
+                    }
+                    break;
+                    case BottomSheetBehavior.STATE_COLLAPSED:
+                    {
+                        cardNearby      .setVisibility(View.VISIBLE);
+                        cardRespond     .setVisibility(View.VISIBLE);
+                        cardCurrent     .setVisibility(View.VISIBLE);
                     }
                     break;
                 }
@@ -293,10 +371,19 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
             }
         });
 
-        search.addTextChangedListener(new TextWatcher() {
+        search.addTextChangedListener(new TextWatcher()
+        {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                bottomSheetSearch.setState(BottomSheetBehavior.STATE_EXPANDED);
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
+            {
+                if(placeArray.isEmpty())
+                {
+                    bottomSheetSearch.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                }
+                else
+                {
+                    bottomSheetSearch.setState(BottomSheetBehavior.STATE_EXPANDED);
+                }
             }
 
             @Override
@@ -335,7 +422,8 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
             @Override
             public void afterTextChanged(Editable editable)
             {
-                placeAdapter.clear();
+                placeArray.clear();
+                placeAdapter.notifyDataSetChanged();
             }
         });
 
@@ -344,6 +432,18 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
             @Override
             public void onClick(View view)
             {
+                if(placeMarker != null)
+                {
+                    for(Marker marker:placeMarker)
+                    {
+                        marker.remove();
+                    }
+                }
+
+                cardNearby.setVisibility(View.VISIBLE);
+                cardRespond.setVisibility(View.VISIBLE);
+                cardCurrent.setVisibility(View.VISIBLE);
+
                 String locationDest = search.getText().toString();
 
                 hideKeyboard(view);
@@ -353,7 +453,6 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
                 if (!locationDest.isEmpty())
                 {
                     Geocoder geocoder = new Geocoder(map.getContext());
-                    bottomSheetSearch.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
                     for(int i = 0; i < placeArray.size(); i++)
                     {
@@ -368,20 +467,31 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
                             e.printStackTrace();
                         }
 
-                        Address address = addressList.get(0);
-                        LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-                        MarkerOptions markerOptions = new MarkerOptions();
-                        markerOptions.position(latLng);
-                        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
-                        pMarker = mGoogleMap.addMarker(markerOptions);
-                        placeMarker.add(pMarker);
-
-                        if(i == 0)
+                        if(addressList != null)
                         {
-                            CameraUpdate gotoSearch = CameraUpdateFactory.newLatLngZoom(latLng, 15);
-                            mGoogleMap.animateCamera(gotoSearch);
+                            Address address = addressList.get(0);
+
+                            LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+
+                            MarkerOptions markerOptions = new MarkerOptions();
+                            markerOptions.position(latLng);
+                            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
+                            pMarker = mGoogleMap.addMarker(markerOptions);
+                            placeMarker.add(pMarker);
+
+                            if(i == 0)
+                            {
+                                CameraUpdate gotoSearch = CameraUpdateFactory.newLatLngZoom(latLng, 15);
+                                mGoogleMap.animateCamera(gotoSearch);
+                            }
+                        }
+                        else
+                        {
+                            Toast.makeText(requireContext(), "Location not found", Toast.LENGTH_SHORT).show();
                         }
                     }
+
+                    search.setText("");
                 }
                 else
                 {
@@ -409,23 +519,24 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap)
     {
-        mGoogleMap = googleMap;
-        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        mGoogleMap.getUiSettings().setMyLocationButtonEnabled(false);
-        mGoogleMap.getUiSettings().setMapToolbarEnabled(false);
-        mGoogleMap.getUiSettings().setCompassEnabled(false);
-        mGoogleMap.setBuildingsEnabled(false);
-        mGoogleMap.setMinZoomPreference(11);
-        mGoogleMap.setMyLocationEnabled(true);
-        mGoogleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(requireContext(), R.raw.mapstyle));
-        locationClient.getLastLocation().addOnCompleteListener(task ->
+        mGoogleMap      = googleMap;
+        mGoogleMap      .setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        mGoogleMap      .getUiSettings().setMyLocationButtonEnabled(false);
+        mGoogleMap      .getUiSettings().setMapToolbarEnabled(false);
+        mGoogleMap      .getUiSettings().setCompassEnabled(false);
+        mGoogleMap      .setBuildingsEnabled(false);
+        mGoogleMap      .setMinZoomPreference(11);
+        mGoogleMap      .setMyLocationEnabled(true);
+        mGoogleMap      .setMapStyle(MapStyleOptions.loadRawResourceStyle(requireContext(), R.raw.mapstyle));
+        locationClient  .getLastLocation()
+                        .addOnCompleteListener(task ->
         {
             if (task.isSuccessful())
             {
-                Location location = task.getResult();
-                LatLng LatLng = new LatLng(location.getLatitude(), location.getLongitude());
-                CameraUpdate gotoLocation = CameraUpdateFactory.newLatLngZoom(LatLng, 20);
-                mGoogleMap.animateCamera(gotoLocation);
+                Location location           = task.getResult();
+                LatLng LatLng               = new LatLng(location.getLatitude(), location.getLongitude());
+                CameraUpdate gotoLocation   = CameraUpdateFactory.newLatLngZoom(LatLng, 20);
+                mGoogleMap                  .moveCamera(gotoLocation);
             }
         });
     }
@@ -436,8 +547,9 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
         {
             if (task.isSuccessful())
             {
-                Location location = task.getResult();
-                gotoLocation(location.getLatitude(), location.getLongitude());
+                Location location       = task.getResult();
+                gotoLocation(location   .getLatitude(),
+                            location    .getLongitude());
             }
         });
     }
@@ -448,10 +560,10 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
         {
             if (task.isSuccessful())
             {
-                Location location = task.getResult();
-                LatLng LatLng = new LatLng(latitude, longitude);
-                CameraUpdate gotoLocation = CameraUpdateFactory.newLatLngZoom(LatLng, 20);
-                mGoogleMap.animateCamera(gotoLocation);
+                Location location           = task.getResult();
+                LatLng LatLng               = new LatLng(latitude, longitude);
+                CameraUpdate gotoLocation   = CameraUpdateFactory.newLatLngZoom(LatLng, 20);
+                mGoogleMap                  .animateCamera(gotoLocation);
             }
         });
     }
@@ -459,13 +571,16 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
     public void saveLocation(double latitude, double longitude)
     {
         DatabaseReference mDatabase;
-        mDatabase = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference();
-        HashMap User = new HashMap();
-        String userId = auth.getCurrentUser().getUid();
-        User.put("lat", latitude);
-        User.put("lng", longitude);
-        mDatabase.child("Users").child(userId).updateChildren(User);
-        mDatabase.keepSynced(true);
+
+        mDatabase           = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference();
+        HashMap User        = new HashMap();
+        String userId       = auth.getCurrentUser().getUid();
+        User                .put("lat", latitude);
+        User                .put("lng", longitude);
+        mDatabase           .child("Users")
+                            .child(userId)
+                            .updateChildren(User);
+        mDatabase           .keepSynced(true);
     }
 
     public void checkMyPermission()
@@ -481,11 +596,11 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
             @Override
             public void onPermissionDenied(PermissionDeniedResponse permissionDeniedResponse)
             {
-                isPermissionGranted = false;
-                Intent intent = new Intent();
-                intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                Uri uri = Uri.fromParts("package", getActivity().getPackageName(), "");
-                intent.setData(uri);
+                isPermissionGranted     = false;
+                Intent intent           = new Intent();
+                intent                  .setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                Uri uri = Uri           .fromParts("package", getActivity().getPackageName(), "");
+                intent                  .setData(uri);
                 startActivity(intent);
             }
             @Override
@@ -518,6 +633,34 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
 
         return false;
     }
+
+    private void changeText(String text, String find)
+    {
+        String nearby = "Fire station/s nearby: " + text;
+        String respond = "Responder/s: " + text;
+
+        SpannableString spannableString = new SpannableString(nearby);
+        ForegroundColorSpan nearbySpan = new ForegroundColorSpan(getActivity().getColor(R.color.LineDirection));
+
+        SpannableString spannableRespond = new SpannableString(respond);
+        ForegroundColorSpan respondSpan = new ForegroundColorSpan(getActivity().getColor(R.color.LineDirection));
+
+        int nearbyStartIndex = nearby.indexOf(text);
+        int nearbyEndIndex = nearbyStartIndex + text.length();
+        int respondStartIndex = respond.indexOf(text);
+        int respondEndIndex = respondStartIndex + text.length();
+
+        spannableString.setSpan(nearbySpan, nearbyStartIndex, nearbyEndIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannableRespond.setSpan(respondSpan, respondStartIndex, respondEndIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        if (find.equals("nearby")) {
+            textFindStations.setText(spannableString);
+        }
+        if (find.equals("respond")) {
+            textMapResponders.setText(spannableRespond);
+        }
+    }
+
 
     @Override
     public void onResume()
@@ -564,7 +707,7 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
         {
             mapFragment.onLowMemory();
 
-            for(Marker marker: respondMarkers)
+            for(Marker marker:respondMarkers)
             {
                 marker.setVisible(false);
             }
@@ -583,11 +726,62 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
                     removePreviousMarker();
                 }
 
+                if(placeMarker != null)
+                {
+                    for(Marker marker:placeMarker)marker.remove();
+                }
+
                 CurrentLocation();
+
+                if(search.isFocused())
+                {
+                    search.clearFocus();
+                }
+
                 break;
             case R.id.seeResponders:
-                bottomResponders.setState(BottomSheetBehavior.STATE_EXPANDED);
 
+                if(!responderArray.isEmpty())
+                {
+                    bottomResponders.setState(BottomSheetBehavior.STATE_EXPANDED);
+                }
+                else
+                {
+                    Toast.makeText(requireContext(), "No responders", Toast.LENGTH_SHORT).show();
+                }
+
+                if(search.isFocused())
+                {
+                    search.clearFocus();
+                }
+                break;
+            case R.id.mapMenu:
+
+                if(cardStations.getVisibility() == View.INVISIBLE)
+                {
+                    cardStations    .setVisibility(View.VISIBLE);
+                    cardSeeList     .setVisibility(View.VISIBLE);
+
+                    Drawable newDrawable =
+                            getResources().getDrawable(R.drawable.arrow_back);
+
+                    mapMenu.setImageDrawable(newDrawable);
+                }
+
+                else
+                {
+                    cardStations    .setVisibility(View.INVISIBLE);
+                    cardSeeList     .setVisibility(View.INVISIBLE);
+
+                    Bitmap newBitmap = currentBitmap;
+
+                    mapMenu.setImageBitmap(newBitmap);
+                }
+
+                if(search.isFocused())
+                {
+                    search.clearFocus();
+                }
                 break;
         }
     }
@@ -805,7 +999,7 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
                                             responder.add(String.valueOf(status));
 
                                             String responderCount = String.valueOf(responder.size());
-                                            textMapResponders.setText("Responder/s: " + responderCount);
+                                            changeText(responderCount, "respond");
                                         }
                                     }
                                 }
@@ -818,7 +1012,7 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
                                     }
 
                                     String responderCount = String.valueOf(responder.size());
-                                    textMapResponders.setText("Responder/s: " + responderCount);
+                                    changeText(responderCount, "respond");
                                 }
                             }
                         }
@@ -931,7 +1125,8 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
     public void showNearbyPlaces(List<HashMap<String, String>> nearbyPlaceList)
     {
         String stationCount = String.valueOf(nearbyPlaceList.size());
-        textFindStations.setText("Nearby fire station/s: " + stationCount);
+
+        changeText(stationCount, "nearby");
 
         findStations.setOnClickListener(new View.OnClickListener()
         {
@@ -976,6 +1171,11 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
                 LatLngBounds bounds = builder.build();
 
                 mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds,200));
+
+                if(search.isFocused())
+                {
+                    search.clearFocus();
+                }
             }
         });
     }
@@ -1102,6 +1302,22 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
                 String duration = String.valueOf(polylineData.getLeg().duration);
             }
         }
+    }
+
+    private Bitmap drawableToBitmap(Drawable drawable)
+    {
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable) drawable).getBitmap();
+        }
+
+        int width = drawable.getIntrinsicWidth();
+        int height = drawable.getIntrinsicHeight();
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
     }
 
     public void hideKeyboard(View view)

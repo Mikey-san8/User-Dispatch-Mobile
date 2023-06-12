@@ -75,9 +75,8 @@
             android:text="Text To Speech"
             tools:ignore="UseSwitchCompatOrMaterialXml"
             android:textSize="16sp"
-            android:textColor="#818181"
-            android:layout_marginTop="5dp"
-            android:checked="true"/>
+            android:textColor="#000000"
+            android:layout_marginTop="5dp" />
 
         <Switch
             android:id="@+id/settingsToAlarm"
@@ -86,9 +85,8 @@
             android:text="Firefighter Nearby"
             tools:ignore="UseSwitchCompatOrMaterialXml"
             android:textSize="16sp"
-            android:textColor="#818181"
-            android:layout_marginTop="20dp"
-            android:checked="true"/>
+            android:textColor="#000000"
+            android:layout_marginTop="20dp" />
 
         <TextView
             android:id="@+id/textView25"
@@ -106,9 +104,8 @@
             android:text="Background Service"
             tools:ignore="UseSwitchCompatOrMaterialXml"
             android:textSize="16sp"
-            android:textColor="#818181"
-            android:layout_marginTop="20dp"
-            android:checked="true"/>
+            android:textColor="#000000"
+            android:layout_marginTop="20dp" />
 
         <TextView
             android:id="@+id/textView8"
@@ -136,7 +133,7 @@
             android:text="Send Anonymous"
             tools:ignore="UseSwitchCompatOrMaterialXml"
             android:textSize="16sp"
-            android:textColor="#818181" />
+            android:textColor="#000000" />
 
         <TextView
             android:layout_width="match_parent"

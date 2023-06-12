@@ -24,8 +24,8 @@
 
         <ImageView
             android:id="@+id/imageView5"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             app:srcCompat="@drawable/fighter"
             android:layout_marginStart="10dp"/>
 
@@ -48,13 +48,15 @@
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/listResponders"
+        android:id="@+id/listMessage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="5dp"
-        android:layout_below="@+id/linearChat"/>
+        android:layout_below="@+id/linearChat"
+        android:layout_above="@+id/inputMessage"/>
 
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/inputMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
@@ -67,6 +69,7 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/typeMessage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:hint="Type your message" />

@@ -32,7 +32,7 @@ import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 
 @SuppressWarnings("ALL")
-public class ActivityLogin extends AppCompatActivity {
+public class U_ActivityLogin extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     ConstraintLayout login_screen_tap;
@@ -40,11 +40,13 @@ public class ActivityLogin extends AppCompatActivity {
     private final int GPS_REQUEST_CODE = 9001;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
         checkMyPermission();
+
         if(isPermissionGranted == false)
         {
             checkMyPermission();
@@ -80,6 +82,7 @@ public class ActivityLogin extends AppCompatActivity {
             }
         });
         login_screen_tap = findViewById(R.id.login_tap_screen);
+
         login_screen_tap.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event)
@@ -98,6 +101,16 @@ public class ActivityLogin extends AppCompatActivity {
                 return false;
             }
         });
+
+        findViewById(R.id.fighterRegister).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                switchFiremanRegister();
+            }
+        });
+
     }
 
     @Override
@@ -116,7 +129,8 @@ public class ActivityLogin extends AppCompatActivity {
     }
 
     @SuppressLint("SetTextI18n")
-    private void authenticateUser() {
+    private void authenticateUser()
+    {
 
         EditText etLoginEmail = findViewById(R.id.logEmailAddress);
         EditText etLoginPassword = findViewById(R.id.logPassword);
@@ -138,7 +152,7 @@ public class ActivityLogin extends AppCompatActivity {
                     }
                     else
                     {
-                        Toast.makeText(ActivityLogin.this, "Password & Email Unmatched",
+                        Toast.makeText(U_ActivityLogin.this, "Password & Email Unmatched",
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -146,17 +160,25 @@ public class ActivityLogin extends AppCompatActivity {
 
     private void showMainActivity()
     {
-       Intent main = new Intent(this, ActivityMain.class);
-       startActivity(main);
-       finish();
+        Intent main = new Intent(this, U_ActivityMain.class);
+        startActivity(main);
+        finish();
     }
 
     private void switchToRegister()
     {
-        Intent intent = new Intent(this, ActivityRegister.class);
+        Intent intent = new Intent(this, U_ActivityRegister.class);
         startActivity(intent);
         finish();
     }
+
+    private void switchFiremanRegister()
+    {
+        Intent intent = new Intent(this, UF_ActivityRegister.class);
+        startActivity(intent);
+        finish();
+    }
+
     private void exit(){
 
         AlertDialog alertDialog = new AlertDialog.Builder(this)
@@ -181,7 +203,7 @@ public class ActivityLogin extends AppCompatActivity {
             @Override
             public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse)
             {
-                Toast.makeText(ActivityLogin.this, "Permission Granted", Toast.LENGTH_SHORT).show();
+                Toast.makeText(U_ActivityLogin.this, "Permission Granted", Toast.LENGTH_SHORT).show();
                 isPermissionGranted = true;
             }
 

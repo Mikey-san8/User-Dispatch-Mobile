@@ -7,10 +7,12 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.InputFilter;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,7 +25,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 @SuppressWarnings("ALL")
-public class ActivityRegister extends AppCompatActivity
+public class U_ActivityRegister extends AppCompatActivity
 {
     FirebaseAuth auth = FirebaseAuth.getInstance();
     FirebaseUser currentUser = auth.getCurrentUser();
@@ -34,12 +36,13 @@ public class ActivityRegister extends AppCompatActivity
 
     private String userId;
 
+    private RadioButton tnc;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-
 
         @SuppressLint({"MissingInflatedId", "LocalSuppress"})
         ImageView exit = findViewById(R.id.Exit);
@@ -51,8 +54,24 @@ public class ActivityRegister extends AppCompatActivity
             return;
         }
 
+        tnc = findViewById(R.id.TnC);
+
         Button btnRegister = findViewById(R.id.Register);
-        btnRegister.setOnClickListener(view -> registerUser());
+        btnRegister.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                if(tnc.isChecked())
+                {
+                    registerUser();
+                }
+                else
+                {
+                    Toast.makeText(U_ActivityRegister.this, "Read and agree with the terms and conditions", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
         @SuppressLint({"MissingInflatedId", "LocalSuppress"})
         ImageView SwitchToLogin = findViewById(R.id.BackToLogin);
@@ -104,7 +123,7 @@ public class ActivityRegister extends AppCompatActivity
             }
             else if(!password.equals(confirm))
             {
-                Toast.makeText(ActivityRegister.this, "Password Unmatched ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(U_ActivityRegister.this, "Password Unmatched ", Toast.LENGTH_SHORT).show();
                 typeRegisterPassword.setTextColor(Color.RED);
                 typeConfirmPassword.setTextColor(Color.RED);
             }
@@ -116,16 +135,17 @@ public class ActivityRegister extends AppCompatActivity
                     {
                         userId = auth.getCurrentUser().getUid();
                         String userName = "User" + userId;
+                        String updatedUserName = userName.substring(0, userName.length() - 18);
                         mDatabase = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference();
-                        zUser user = new zUser(firstName, lastName, email, address, phone, password, userId, userName);
+                        zUser user = new zUser(firstName, lastName, email, address, phone, password, userId, updatedUserName);
                         mDatabase.child("Users").child(userId).setValue(user)
-                                .addOnSuccessListener(aVoid -> Toast.makeText(ActivityRegister.this, "Success", Toast.LENGTH_SHORT).show())
-                                .addOnFailureListener(e -> Toast.makeText(ActivityRegister.this, "Registration Failed", Toast.LENGTH_SHORT).show());
+                                .addOnSuccessListener(aVoid -> Toast.makeText(U_ActivityRegister.this, "Success", Toast.LENGTH_SHORT).show())
+                                .addOnFailureListener(e -> Toast.makeText(U_ActivityRegister.this, "Registration Failed", Toast.LENGTH_SHORT).show());
                         logoutUser();
                     }
                     else
                     {
-                        Toast.makeText(ActivityRegister.this, "Registration Failed" + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(U_ActivityRegister.this, "Registration Failed" + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -150,15 +170,13 @@ public class ActivityRegister extends AppCompatActivity
         return true;
     }
 
-
-
     private void switchToLogin()
     {
-        Intent intent = new Intent(this, ActivityLogin.class); startActivity(intent); finish();
+        Intent intent = new Intent(this, U_ActivityLogin.class); startActivity(intent); finish();
     }
 
     private void logoutUser()
     {
-        FirebaseAuth.getInstance().signOut(); Intent intent = new Intent(this, ActivityLogin.class); startActivity(intent); finish();
+        FirebaseAuth.getInstance().signOut(); Intent intent = new Intent(this, U_ActivityLogin.class); startActivity(intent); finish();
     }
 }

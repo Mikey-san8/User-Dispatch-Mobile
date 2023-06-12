@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("ALL")
-public class FragmentChat extends Fragment implements xCustomAdapter.OnItemClickListener
+public class FragmentChat extends Fragment implements xChatAdapter.OnItemClickListener
 {
     FirebaseAuth auth = FirebaseAuth.getInstance();
 
@@ -31,7 +30,7 @@ public class FragmentChat extends Fragment implements xCustomAdapter.OnItemClick
 
     RecyclerView chatList;
 
-    private xCustomAdapter adapter;
+    private xChatAdapter adapter;
 
     private List<zDataItem> dataList;
 
@@ -49,6 +48,13 @@ public class FragmentChat extends Fragment implements xCustomAdapter.OnItemClick
 
         return chat;
     }
+
+    DataSnapshot lastMessage;
+    String key;
+    String name;
+    String time;
+    String userName;
+    Boolean getAnonymous;
 
     public void retrieveStatus()
     {
@@ -69,30 +75,65 @@ public class FragmentChat extends Fragment implements xCustomAdapter.OnItemClick
                     dataList.clear();
                 }
 
-               for(DataSnapshot users: snapshot.child("Users").getChildren())
-               {
-                   String userKey = users.getKey();
+                if(snapshot.child("Messages").hasChild("Firefighter"))
+                {
+                    for(DataSnapshot messages: snapshot.child("Messages").child("Firefighter").getChildren())
+                    {
+                        String getUser = messages.getKey();
 
-                   if(userId.equals(userKey))
-                   {
-                       for(DataSnapshot status: users.child("Responders").getChildren())
-                       {
-                           Boolean checkStatus = status.child("Status").getValue(Boolean.class);
-                           String fighterKey = status.getKey();
+                        for (DataSnapshot user : messages.child(userId).getChildren())
+                        {
+                            name            = snapshot.child("Firefighter").child(getUser).child("lastName").getValue(String.class);
+                            time            = user.child("time").getValue(String.class);
+                            userName        = snapshot.child("Firefighter").child(getUser).child("userId").getValue(String.class);
+                            getAnonymous    = snapshot.child("Firefighter").child(getUser).child("Settings").child("send anonymous").getValue(Boolean.class);
+                            lastMessage     = user;
+                        }
 
-                           if(checkStatus == true)
-                           {
-                               String Name = snapshot.child("Firefighter").child(fighterKey).child("lastName").getValue(String.class);
-                               String time = status.child("Time").getValue(String.class);
-                               String message = "I am on my way!";
+                        String updatedUserName = null;
 
-                               dataList.add(new zDataItem(Name, message, time, fighterKey));
+                        if (userName != null && userName.length() > 20)
+                        {
+                            updatedUserName = "fighter." + userName.substring(0, userName.length() - 20);
+                        }
 
-                               adapter.notifyDataSetChanged();
-                           }
-                       }
-                   }
-               }
+                        String getName  = null;
+                        String getEmail = null;
+
+                        if(getAnonymous == true)
+                        {
+                            getName     = updatedUserName;
+                        }
+                        else
+                        {
+                            getName     = name;
+                        }
+
+                        if (lastMessage != null)
+                        {
+                            Object messageValue = lastMessage.child("message").getValue();
+                            String getMessage = null;
+
+                            if (messageValue instanceof Double) {
+                                Double doubleValue = (Double) messageValue;
+                                getMessage = String.valueOf(doubleValue);
+                            }
+                            else if (messageValue instanceof String)
+                            {
+                                String stringValue = (String) messageValue;
+                                getMessage = stringValue;
+                            }
+                            else if (messageValue instanceof Integer)
+                            {
+                                Integer integerValue = (Integer) messageValue;
+                                getMessage = String.valueOf(integerValue);
+                            }
+
+                            dataList.add(new zDataItem(getName, getMessage, time, getUser));
+                            adapter.notifyDataSetChanged();
+                        }
+                    }
+                }
             }
 
             @Override
@@ -116,7 +157,7 @@ public class FragmentChat extends Fragment implements xCustomAdapter.OnItemClick
 
         dataList = new ArrayList<>();
 
-        adapter = new xCustomAdapter(dataList, this);
+        adapter = new xChatAdapter(dataList, this);
 
         chatList.setAdapter(adapter);
     }
@@ -131,12 +172,9 @@ public class FragmentChat extends Fragment implements xCustomAdapter.OnItemClick
         Bundle bundle = new Bundle();
 
         bundle.putString("Name", name);
+        bundle.putString("Key", item.getKey());
 
         message.setArguments(bundle);
-
-        FragmentManager fragmentManager = getParentFragmentManager();
-
-        fragmentManager.popBackStack();
 
         FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
 
