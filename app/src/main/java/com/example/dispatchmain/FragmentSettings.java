@@ -66,10 +66,10 @@ public class FragmentSettings extends Fragment implements Switch.OnCheckedChange
         alarm               = settings.findViewById(R.id.settingsToAlarm);
         sendAnonymous       = settings.findViewById(R.id.settingsToAnonymous);
 
-        textToSpeech.setOnCheckedChangeListener(this);
-        backgroundService.setOnCheckedChangeListener(this);
-        alarm.setOnCheckedChangeListener(this);
-        sendAnonymous.setOnCheckedChangeListener(this);
+        textToSpeech        .setOnCheckedChangeListener(this);
+        backgroundService   .setOnCheckedChangeListener(this);
+        alarm               .setOnCheckedChangeListener(this);
+        sendAnonymous       .setOnCheckedChangeListener(this);
 
         settings            .findViewById(R.id.settingsToHome)
                             .setOnClickListener(new View.OnClickListener() {
@@ -200,7 +200,7 @@ public class FragmentSettings extends Fragment implements Switch.OnCheckedChange
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
     {
-         Map<String, Object> setSetting = new HashMap<>();
+        Map<String, Object> setSetting = new HashMap<>();
 
         firebaseDatabase = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/");
         databaseReference = firebaseDatabase.getReference();

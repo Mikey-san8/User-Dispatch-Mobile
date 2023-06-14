@@ -4,12 +4,17 @@ package com.example.dispatchmain;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.TextUtils;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -19,11 +24,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.SignInMethodQueryResult;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionDeniedResponse;
@@ -32,12 +44,25 @@ import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 
 @SuppressWarnings("ALL")
-public class U_ActivityLogin extends AppCompatActivity {
+public class U_ActivityLogin extends AppCompatActivity
+{
 
-    private FirebaseAuth mAuth;
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();;
+
     ConstraintLayout login_screen_tap;
+
     boolean isPermissionGranted;
+
     private final int GPS_REQUEST_CODE = 9001;
+
+    String email;
+
+    boolean isPasswordVisible = false;
+
+    TextInputLayout revealPass;
+
+    FirebaseDatabase firebaseDatabase;
+    DatabaseReference databaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -56,7 +81,7 @@ public class U_ActivityLogin extends AppCompatActivity {
         @SuppressLint({"MissingInflatedId", "LocalSuppress"})
         ImageView close = findViewById(R.id.CloseApp);
         close.setOnClickListener(view -> exit());
-        mAuth = FirebaseAuth.getInstance();
+
         if (mAuth.getCurrentUser() != null)
         {
             finish();
@@ -111,6 +136,47 @@ public class U_ActivityLogin extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.forgot).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                showEmailBox();
+            }
+        });
+
+        revealPass = findViewById(R.id.layoutLoginPass);
+
+        revealPass.addOnEndIconChangedListener(new TextInputLayout.OnEndIconChangedListener() {
+            @Override
+            public void onEndIconChanged(@NonNull TextInputLayout textInputLayout, int previousIcon) {
+
+                if (previousIcon == TextInputLayout.END_ICON_PASSWORD_TOGGLE)
+                {
+                    EditText editText = textInputLayout.getEditText();
+
+                    if (editText != null)
+                    {
+                        int selectionStart = editText.getSelectionStart();
+
+                        int selectionEnd = editText.getSelectionEnd();
+
+                        isPasswordVisible = !isPasswordVisible;
+
+                        if (isPasswordVisible)
+                        {
+                            editText.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                        }
+                        else
+                        {
+
+                            editText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                        }
+
+                        editText.setSelection(selectionStart, selectionEnd);
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -131,11 +197,12 @@ public class U_ActivityLogin extends AppCompatActivity {
     @SuppressLint("SetTextI18n")
     private void authenticateUser()
     {
-
         EditText etLoginEmail = findViewById(R.id.logEmailAddress);
+
         EditText etLoginPassword = findViewById(R.id.logPassword);
 
         String email = etLoginEmail.getText().toString();
+
         String password = etLoginPassword.getText().toString();
 
         if (email.isEmpty() || password.isEmpty())
@@ -145,22 +212,137 @@ public class U_ActivityLogin extends AppCompatActivity {
             return;
         }
         mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, task -> {
+                .addOnCompleteListener(this, task ->
+                {
                     if (task.isSuccessful())
                     {
                         showMainActivity();
                     }
                     else
                     {
-                        Toast.makeText(U_ActivityLogin.this, "Password & Email Unmatched",
-                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(U_ActivityLogin.this, "Password & Email Unmatched", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
+    private AlertDialog alertDialog;
+
+    private void showEmailBox()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_forgot_password, null);
+
+        EditText email = dialogView.findViewById(R.id.inputEmailVerify);
+        TextView sendCode = dialogView.findViewById(R.id.sendCode);
+
+        sendCode.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                String verificationEmail = email.getText().toString().trim();
+
+                if (TextUtils.isEmpty(verificationEmail))
+                {
+                    Toast.makeText(U_ActivityLogin.this, "Enter email address", Toast.LENGTH_SHORT).show();
+                }
+                else
+                {
+                    sendPasswordResetEmail(verificationEmail);
+                }
+                alertDialog.dismiss();
+            }
+        });
+        builder.setView(dialogView);
+        alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void sendPasswordResetEmail(String email)
+    {
+        mAuth.fetchSignInMethodsForEmail(email).addOnCompleteListener(new OnCompleteListener<SignInMethodQueryResult>() {
+
+            @Override
+            public void onComplete(@NonNull Task<SignInMethodQueryResult> task) {
+            if (task.isSuccessful())
+            {
+                SignInMethodQueryResult result = task.getResult();
+
+                if (result != null && result.getSignInMethods() != null && result.getSignInMethods().isEmpty())
+                {
+                    Toast.makeText(U_ActivityLogin.this, "Email does not exist", Toast.LENGTH_SHORT).show();
+                }
+                else
+                {
+                    mAuth.sendPasswordResetEmail(email)
+                        .addOnCompleteListener(new OnCompleteListener<Void>()
+                        {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task)
+                            {
+                                if (task.isSuccessful())
+                                {
+                                    Toast.makeText(U_ActivityLogin.this, "Password reset email sent", Toast.LENGTH_SHORT).show();
+
+                                    showVerificationDialog(email);
+                                }
+                                else
+                                {
+                                    Toast.makeText(U_ActivityLogin.this, "Failed to send reset email", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    }
+                }
+                else
+                {
+                    Toast.makeText(U_ActivityLogin.this, "Failed to check email existence", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private void showVerificationDialog(String email)
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Check inbox/spam of your reset password link\n\nEmail: "+email);
+        builder.setNegativeButton("Other", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which)
+            {
+                Toast.makeText(U_ActivityLogin.this, "Go to inbox/spam to use reset link", Toast.LENGTH_LONG).show();
+                dialog.cancel();
+            }
+        });
+        builder.setPositiveButton("Gmail", new DialogInterface.OnClickListener()
+        {
+            @Override
+            public void onClick(DialogInterface dialog, int which)
+            {
+                String url = "https://mail.google.com";
+
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                intent.setPackage("com.android.chrome");
+
+                try
+                {
+                    startActivity(intent);
+                }
+                catch (ActivityNotFoundException e)
+                {
+
+                }
+
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
     private void showMainActivity()
     {
-        Intent main = new Intent(this, U_ActivityMain.class);
+        Intent main = new Intent(this, U_ActivitySplash.class);
         startActivity(main);
         finish();
     }

@@ -178,6 +178,8 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
 
     Bitmap currentBitmap;
 
+    zCalculations calculate;
+
     public FragmentMap()
     {
 
@@ -224,6 +226,8 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
 
     public void events()
     {
+        calculate               = new zCalculations(map.getContext());
+
         textMapResponders       = map.findViewById(R.id.textMapResponders);
         textFindStations        = map.findViewById(R.id.textFindStations);
 
@@ -1059,21 +1063,6 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
         }
 
         return null;
-    }
-
-    private double calculateDistance(LatLng loc1, LatLng loc2)
-    {
-        Location startPoint=new Location("locationA");
-        startPoint.setLatitude(loc1.latitude);
-        startPoint.setLongitude(loc1.longitude);
-
-        Location endPoint=new Location("locationA");
-        endPoint.setLatitude(loc2.latitude);
-        endPoint.setLongitude(loc2.longitude);
-
-        double distance=startPoint.distanceTo(endPoint);
-
-        return distance;
     }
 
     public class NearbyStation extends AsyncTask<Object, String, String>

@@ -17,6 +17,7 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.NOTIFICATION_SERVICE" />
 
     <application
         android:name=".zDispatchApplication"
@@ -70,6 +71,11 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
+
+        <service
+            android:name=".zLocationService"
+            android:foregroundServiceType="location"
+            android:stopWithTask="false" />
 
         <meta-data
             android:name="com.google.android.gms.version"

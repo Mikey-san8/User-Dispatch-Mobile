@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+@SuppressWarnings("ALL")
 public class xMessageAdapter extends RecyclerView.Adapter<xMessageAdapter.ViewHolder>
 {
     public List<zDataMessage> dataList;

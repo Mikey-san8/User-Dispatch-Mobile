@@ -82,7 +82,7 @@ public class U_ActivityMain extends AppCompatActivity implements BottomNavigatio
 
         bottomNavigation();
         mainEvents();
-        getNearby();
+//        getNearby();
 
         textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener()
         {
@@ -377,6 +377,8 @@ public class U_ActivityMain extends AppCompatActivity implements BottomNavigatio
 
                 drawerN.setText(firstName + " " + lastName);
                 drawerE.setText(email);
+
+
 
             }
 

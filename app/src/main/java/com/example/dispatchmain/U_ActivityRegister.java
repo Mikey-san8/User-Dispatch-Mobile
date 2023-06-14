@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.text.InputFilter;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -87,26 +86,21 @@ public class U_ActivityRegister extends AppCompatActivity
 
     public void registerUser()
     {
-        EditText typeFirstName = findViewById(R.id.FirstName);
-        EditText typeLastName = findViewById(R.id.LastName);
-        EditText typeRegisterEmail = findViewById(R.id.EmailAddress);
-        EditText typeRegisterPassword = findViewById(R.id.Password);
-        EditText typeConfirmPassword = findViewById(R.id.ConfirmPassword);
-        EditText typePhoneNumber = findViewById(R.id.Phone);
-        EditText typeAddress = findViewById(R.id.Address);
+        EditText typeFirstName          = findViewById(R.id.FirstName);
+        EditText typeLastName           = findViewById(R.id.LastName);
+        EditText typeRegisterEmail      = findViewById(R.id.EmailAddress);
+        EditText typeRegisterPassword   = findViewById(R.id.Password);
+        EditText typeConfirmPassword    = findViewById(R.id.ConfirmPassword);
+        EditText typePhoneNumber        = findViewById(R.id.Phone);
+        EditText typeAddress            = findViewById(R.id.Address);
 
-        String firstName = typeFirstName.getText().toString();
-        String lastName = typeLastName.getText().toString();
-        String email = typeRegisterEmail.getText().toString();
-        String password = typeRegisterPassword.getText().toString();
-        String confirm = typeConfirmPassword.getText().toString();
-        String phone = typePhoneNumber.getText().toString();
-        String address = typeAddress.getText().toString();
-
-        InputFilter[] filters = new InputFilter[]{
-                new xMaxLengthFilter(10)
-        };
-        typePhoneNumber.setFilters(filters);
+        String firstName                = typeFirstName.getText().toString();
+        String lastName                 = typeLastName.getText().toString();
+        String email                    = typeRegisterEmail.getText().toString();
+        String password                 = typeRegisterPassword.getText().toString();
+        String confirm                  = typeConfirmPassword.getText().toString();
+        String phone                    = typePhoneNumber.getText().toString();
+        String address                  = typeAddress.getText().toString();
 
         if (firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || password.isEmpty() || confirm.isEmpty() || phone.isEmpty() || address.isEmpty())
         {
@@ -120,6 +114,11 @@ public class U_ActivityRegister extends AppCompatActivity
                 textPassword.setTextColor(Color.RED);
                 String passInvalid = "Password Invalid";
                 Toast.makeText(this, passInvalid, Toast.LENGTH_SHORT).show();
+            }
+            else if(!isPhoneValid(phone))
+            {
+                typePhoneNumber.setTextColor(Color.RED);
+                Toast.makeText(this, "Provide phone number with 11 digits", Toast.LENGTH_LONG).show();
             }
             else if(!password.equals(confirm))
             {
@@ -153,17 +152,30 @@ public class U_ActivityRegister extends AppCompatActivity
         }
     }
 
+    private boolean isPhoneValid(String phone)
+    {
+        if(phone.length() != 11)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     public boolean isPasswordValid(String password)
     {
-        if (password.length() < 7) {
+        if (password.length() < 7)
+        {
             return false;
         }
 
-        if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*")) {
+        if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*"))
+        {
             return false;
         }
 
-        if (!password.matches(".*[A-Z].*") || !password.matches(".*[a-z].*")) {
+        if (!password.matches(".*[A-Z].*") || !password.matches(".*[a-z].*"))
+        {
             return false;
         }
 

@@ -1128,8 +1128,6 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
         dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault());
         String timeDate = dateFormat.format(new Date());
 
-
-
         Map<String, Object> report = new HashMap<>();
         report.put("FullName", name);
         report.put("MobileNumber", phone);

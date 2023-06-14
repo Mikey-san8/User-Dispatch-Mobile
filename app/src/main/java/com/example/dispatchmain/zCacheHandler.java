@@ -8,7 +8,7 @@ public class zCacheHandler
     private static zCacheHandler instance;
     private Map<String, Object> cache;
 
-    private zCacheHandler() {
+    public zCacheHandler() {
         cache = new HashMap<>();
     }
 
