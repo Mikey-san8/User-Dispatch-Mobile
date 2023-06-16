@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/cardBackTerms">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/termTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="20dp"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:textColor="#3932FF"
+                android:text="Terms and Conditions" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="20dp"
+                android:layout_marginTop="20dp"
+                android:layout_toEndOf="@+id/termTitle"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:textColor="#000000"
+                android:text=" of Dispatch Mobile Application" />
+
+            <TextView
+                android:id="@+id/termBody"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="10dp"
+                android:layout_below="@+id/termTitle"
+                android:layout_marginEnd="20dp"
+                android:textSize="14sp"
+                android:textColor="#000000"
+                android:text="These Terms and Conditions govern your access to and use of the Dispatch mobile application, developed by the researchers from Lyceum of the Philippines - Manila. By downloading, installing, or using the App, you agree to be bound by this Agreement. If you do not agree with any part of this Agreement, you should not use the App." />
+
+
+            <LinearLayout
+                android:id="@+id/termBody2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_below="@+id/termBody"
+                android:layout_marginEnd="20dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginBottom="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#000000"
+                    android:text="1. Your Information: When you use Dispatch, we may collect your location, name, phone number, and email address. Please provide accurate and up-to-date information." />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#000000"
+                    android:text="2. Privacy: We value your privacy. Our Privacy Policy explains how we collect, use, and protect your information. By using Dispatch, you agree to our Privacy Policy." />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#000000"
+                    android:text="3. App Usage:
+\n\ta. You can use Dispatch for personal, non-commercial\n\t\t\tpurposes only.
+\n\tb. Don't use the app to violate laws or infringe on others'\n\t\t\trights.
+\n\tc. You can't modify, distribute, sell, rent, or reverse\n\t\t\tengineer the app.
+\n\td. We may change or suspend the app without notice." />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#000000"
+                    android:text="4. Intellectual Property: The app's design, content, and trademarks are owned or licensed by us. Don't use, reproduce, or create derivative works without our permission." />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#000000"
+                    android:text="5. Limitation of Liability: We provide the app and are not responsible for its availability, accuracy, or any damages caused by using it." />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#000000"
+                    android:text="6. Indemnification: You agree to defend and hold us harmless from any claims or losses arising from your use of the app." />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#000000"
+                    android:text="7. Termination: We may suspend or terminate your access to Dispatch at any time without prior notice." />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#000000"
+                    android:text="8. Governing Law: This Agreement is governed by the laws of the Philippines." />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#000000"
+                    android:text="9. Entire Agreement: This Agreement represents the entire understanding between you and us regarding the use of Dispatch." />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#000000"
+                    android:text="9. Severability: If any part of this Agreement is invalid, the rest of the Agreement still applies." />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:textSize="13sp"
+                    android:textColor="#000000"
+                    android:text="Data Privacy Act for Dispatch Mobile Application
+
+\n\nWe, the researchers from Lyceum of the Philippines - Manila, value your privacy and have developed the Dispatch mobile application with great care to protect your personal information. This Data Privacy Act explains how we collect, use, disclose, and keep your information safe when you use the Dispatch app. By using the app, you agree to the terms outlined in this Act.
+
+\n\nWhen you use Dispatch, we may collect certain types of information from you. This includes your location, name, phone number, and email address. We collect this information to provide you with personalized services, communicate important updates, and improve the app's features. We will only use your information for the purposes stated in this Act.
+
+\n\nYour personal information will be stored securely on our servers. We take necessary precautions to protect it from unauthorized access or misuse. We will retain your information for as long as needed to fulfill the purposes mentioned in this Act and as required by applicable laws.
+
+\n\nWe do not share your personal information with third parties without your consent unless it is required by law or necessary to provide you with the services of the app. We prioritize your privacy and ensure that your information is handled with the utmost care.
+
+\n\nBy using the Dispatch app, you are giving us your consent to collect, use, and process your personal information as described in this Act. If you have any concerns or wish to withdraw your consent, please uninstall the app and contact us using the provided contact information.
+
+\n\nThank you for trusting Dispatch to safeguard your personal information." />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#000000"
+                    android:layout_marginTop="10dp"
+                    android:textStyle="bold"
+                    android:text="If you have any questions, contact us at dispatchofficial@gmail.com." />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/cardBackTerms"
+        android:layout_alignParentBottom="true">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="25dp"
+            android:layout_marginBottom="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginTop="15dp"
+            android:layout_gravity="end"
+            android:backgroundTint="#FF9090">
+
+            <TextView
+                android:id="@+id/OK"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="#FFFFFF"
+                android:layout_margin="10dp"
+                android:textStyle="bold"
+                android:text="OK"/>
+
+        </androidx.cardview.widget.CardView>
+
+    </FrameLayout>
+
+</RelativeLayout>

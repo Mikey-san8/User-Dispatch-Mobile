@@ -1,8 +1,14 @@
 package com.example.dispatchmain;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
@@ -12,8 +18,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -23,18 +31,19 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 @SuppressWarnings("ALL")
@@ -108,9 +117,12 @@ public class U_ActivityMain extends AppCompatActivity implements BottomNavigatio
 
         navigationView.setCheckedItem(R.id.nav_home);
         navigationView.setNavigationItemSelectedListener(this);
+
+        getNearby();
     }
 
     Boolean getAlarm;
+    List<String> keys = new ArrayList<>();
 
     public void getNearby()
     {
@@ -119,96 +131,88 @@ public class U_ActivityMain extends AppCompatActivity implements BottomNavigatio
         firebaseDatabase = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/");
         databaseReference = firebaseDatabase.getReference();
 
-        ValueEventListener valueEventListener = new ValueEventListener()
-        {
+        ChildEventListener respondersListener = new ChildEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot)
-            {
-                for(DataSnapshot users:snapshot.child("Users").getChildren())
-                {
-                    String getKey = users.getKey();
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
 
-                    if(userId.equals(getKey))
-                    {
-                        getAlarm = users.child("Settings").child("alarm").getValue(Boolean.class);
-                    }
-                }
-
-                fusedLocationClient.getLastLocation().addOnCompleteListener(task ->
-                {
-                    if(task.isSuccessful())
-                    {
-                        Location location = task.getResult();
-
-                        for (DataSnapshot Snapshot : snapshot.child("Firefighter").getChildren())
-                        {
-                            if (Snapshot.hasChild("Settings"))
-                            {
-                                Boolean onlineStatus = Snapshot.child("Settings").child("online status").getValue(Boolean.class);
-
-                                if (onlineStatus == true)
-                                {
-                                    Double lat      = Snapshot.child("lat").getValue(Double.class);
-                                    Double lng      = Snapshot.child("lng").getValue(Double.class);
-                                    String userName   = Snapshot.child("userId").getValue(String.class);
-                                    String updatedUserName = null;
-
-                                    if (userName != null && userName.length() > 20)
-                                    {
-                                        updatedUserName = "fighter." + userName.substring(0, userName.length() - 20);
-                                    }
-
-                                    LatLng fighterLocation = new LatLng(lat, lng);
-                                    LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-
-                                    double getDistance = calculate.calculateDistance(fighterLocation, userLocation) / 1000;
-
-                                    DecimalFormat decimalFormat = new DecimalFormat("#.##");
-
-                                    String formattedDistance = decimalFormat.format(getDistance);
-
-                                    String getName  = null;
-
-                                    if (calculate.calculateDistance(fighterLocation, userLocation) < 301
-                                            && calculate.calculateDistance(fighterLocation, userLocation) >= 289)
-                                    {
-                                        Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
-
-                                        if(getAlarm == true)
-                                        {
-//                                            AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
-//                                            builder.setMessage(updatedUserName+" is nearby\nDistance: "+formattedDistance+"km");
-//                                            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener()
-//                                            {
-//                                                @Override
-//                                                public void onClick(DialogInterface dialog, int which)
-//                                                {
-//
-//                                                }
-//                                            });
-//                                            AlertDialog dialog = builder.create();
-//                                            dialog.show();
-
-                                            String speech = "A firefighter is nearby! Distance is " + formattedDistance;
-                                            textToSpeech.speak(speech, TextToSpeech.QUEUE_ADD, null);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error)
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName)
             {
+                Boolean checkStatus = snapshot.child("Status").getValue(Boolean.class);
+                String userID       = snapshot.getKey();
+                String updatedUserName = null;
+
+                if (userID != null && userID.length() > 20)
+                {
+                    updatedUserName = "firefighter." + userID.substring(0, userID.length() - 20);
+                }
+
+                if (checkStatus != null)
+                {
+                    if (checkStatus)
+                    {
+                        showNotification(updatedUserName+" is responding!", "Responding");
+                    }
+                    else
+                    {
+                        showNotification(updatedUserName+" cancelled the response!", "Cancelled");
+                    }
+                }
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
             }
         };
 
-        databaseReference.addValueEventListener(valueEventListener);
+        databaseReference.child("Users").child(userId).child("Responders").addChildEventListener(respondersListener);
     }
+
+    private void showNotification(String message, String title)
+    {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel("responder", "responder notification", NotificationManager.IMPORTANCE_DEFAULT);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "responder")
+                .setSmallIcon(R.drawable.fireicon)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setSound(defaultSoundUri)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
+                .setAutoCancel(true);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        {
+            builder.setCategory(NotificationCompat.CATEGORY_CALL)
+                    .setFullScreenIntent(null, true);
+        }
+
+        int notificationID = (int) System.currentTimeMillis();
+
+        notificationManager.notify(notificationID, builder.build());
+    }
+
+
 
     public void bottomNavigation()
     {

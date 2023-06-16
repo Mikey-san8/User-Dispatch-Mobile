@@ -16,6 +16,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -37,6 +38,8 @@ public class U_ActivityRegister extends AppCompatActivity
 
     private RadioButton tnc;
 
+    private boolean checkTerms = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -56,6 +59,7 @@ public class U_ActivityRegister extends AppCompatActivity
         tnc = findViewById(R.id.TnC);
 
         Button btnRegister = findViewById(R.id.Register);
+
         btnRegister.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -63,7 +67,8 @@ public class U_ActivityRegister extends AppCompatActivity
             {
                 if(tnc.isChecked())
                 {
-                    registerUser();
+                    checkTerms = true;
+                    showTerms();
                 }
                 else
                 {
@@ -81,6 +86,15 @@ public class U_ActivityRegister extends AppCompatActivity
         register_tap_screen.setOnClickListener(view -> {
             InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
             inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        });
+
+        findViewById(R.id.TAC).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                checkTerms = false;
+                showTerms();
+            }
         });
     }
 
@@ -150,6 +164,39 @@ public class U_ActivityRegister extends AppCompatActivity
 
             }
         }
+    }
+
+    private AlertDialog alertDialog;
+
+    private void showTerms()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_terms_and_conditions, null);
+
+        TextView ok = dialogView.findViewById(R.id.OK);
+
+        ok.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                if(checkTerms == true)
+                {
+                    registerUser();
+                    alertDialog.dismiss();
+                }
+                else
+                {
+                    alertDialog.dismiss();
+                    checkTerms = true;
+                }
+            }
+        });
+
+        builder.setView(dialogView);
+        alertDialog = builder.create();
+        alertDialog.show();
     }
 
     private boolean isPhoneValid(String phone)

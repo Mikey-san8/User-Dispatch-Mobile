@@ -797,6 +797,11 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
             @Override
             public void onClick(DialogInterface dialog, int which)
             {
+                String userId = auth.getCurrentUser().getUid();
+
+                firebaseDatabase = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/");
+                databaseReference = firebaseDatabase.getReference();
+
                 if(settingSpeech == true)
                 {
                     String sendingReport = "You are now sending the report.";
@@ -815,13 +820,50 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
                 String lUser = userL.getText().toString();
                 String cUser = userC.getText().toString();
 
-                sendReport(nUser, pUser, aUser, lUser, cUser);
+                databaseReference.addListenerForSingleValueEvent(new ValueEventListener()
+                {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot)
+                    {
+                        Boolean checkAnonymous = snapshot.child("Users").child(userId).child("Settings").child("send anonymous").getValue(Boolean.class);
+
+                        String updatedUserName = null;
+
+                        if (userId != null && userId.length() > 20)
+                        {
+                            updatedUserName = "user." + userId.substring(0, userId.length() - 20);
+                        }
+
+                        String getName      = null;
+
+
+                        if(checkAnonymous == true)
+                        {
+                            getName     = updatedUserName;
+                        }
+                        else
+                        {
+                            getName     = nUser;
+                        }
+
+                        sendReport(getName, pUser, aUser, lUser, cUser);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
 
                 bottomSheetCall.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
                 if(!bundle.isEmpty())
                 {
                     bundle.clear();
                 }
+
+                dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault());
+
                 bundle.putString("Name", nUser);
                 bundle.putString("Phone", pUser);
                 bundle.putString("Address", aUser);
@@ -873,6 +915,29 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
         dialog.show();
     }
 
+    public void sendReport(String name, String phone, String address, String location, String comment)
+    {
+        String userId = auth.getCurrentUser().getUid();
+
+        long currentTime    = System.currentTimeMillis();
+
+        dateFormat          = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault());
+        String timeDate     = dateFormat.format(new Date());
+
+        Map<String, Object> report = new HashMap<>();
+        report.put("FullName", name);
+        report.put("MobileNumber", phone);
+        report.put("Home Address", address);
+        report.put("Location", location);
+        report.put("Comment", comment);
+        report.put("Date & Time", timeDate);
+        report.put("TimeStamp", currentTime);
+
+        databaseReference.child("Users").child(userId).child("Report").updateChildren(report);
+        databaseReference.child("Users").child(userId).child("Report").child("Reports").push().updateChildren(report);
+        databaseReference.child("Data").push().updateChildren(report);
+    }
+
     public void blinking()
     {
         Animation anim = new AlphaAnimation(0.5f, 1.0f);
@@ -894,7 +959,6 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
         sendButton  .startAnimation(anim);
 
     }
-
 
     private void logoutUser()
     {
@@ -1117,32 +1181,6 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
         };
 
         databaseReference.addValueEventListener(valueEventListener);
-    }
-
-    public void sendReport(String name, String phone, String address, String location, String comment)
-    {
-        String userId = auth.getCurrentUser().getUid();
-
-        long currentTime = System.currentTimeMillis();
-
-        dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault());
-        String timeDate = dateFormat.format(new Date());
-
-        Map<String, Object> report = new HashMap<>();
-        report.put("FullName", name);
-        report.put("MobileNumber", phone);
-        report.put("Home Address", address);
-        report.put("Location", location);
-        report.put("Comment", comment);
-        report.put("Date & Time", timeDate);
-        report.put("TimeStamp", currentTime);
-
-        firebaseDatabase = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/");
-        databaseReference = firebaseDatabase.getReference();
-
-        databaseReference.child("Users").child(userId).child("Report").updateChildren(report);
-        databaseReference.child("Users").child(userId).child("Report").child("Reports").push().updateChildren(report);
-        databaseReference.child("Data").push().updateChildren(report);
     }
 
     public void hideKeyboard(View view)
