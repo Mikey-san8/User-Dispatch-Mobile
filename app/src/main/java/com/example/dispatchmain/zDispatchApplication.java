@@ -5,12 +5,22 @@ import android.content.Intent;
 
 public class zDispatchApplication extends Application
 {
+    private boolean isAppInForeground = false;
+    private zLifeCycleCallbacks zLifeCycleCallbacks;
+
     @Override
     public void onCreate()
     {
         super.onCreate();
 
         Thread.setDefaultUncaughtExceptionHandler(new RestartingExceptionHandler());
+
+        zLifeCycleCallbacks = new zLifeCycleCallbacks();
+        registerActivityLifecycleCallbacks(zLifeCycleCallbacks);
+    }
+
+    public boolean isAppInForeground() {
+        return zLifeCycleCallbacks.isAppInForeground();
     }
 
     private class RestartingExceptionHandler implements Thread.UncaughtExceptionHandler

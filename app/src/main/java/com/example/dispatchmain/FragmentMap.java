@@ -362,6 +362,16 @@ public class FragmentMap extends Fragment implements OnMapReadyCallback, View.On
                         cardNearby      .setVisibility(View.VISIBLE);
                         cardRespond     .setVisibility(View.VISIBLE);
                         cardCurrent     .setVisibility(View.VISIBLE);
+
+                        if(mPolyLinesData.size() > 0)
+                        {
+                            for(zPolylineData polylineData: mPolyLinesData)
+                            {
+                                polylineData.getPolyline().remove();
+                            }
+                            mPolyLinesData.clear();
+                            mPolyLinesData = new ArrayList<>();
+                        }
                     }
                     break;
                 }

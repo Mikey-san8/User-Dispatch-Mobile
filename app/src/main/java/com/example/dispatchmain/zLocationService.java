@@ -1,10 +1,9 @@
 package com.example.dispatchmain;
 
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.media.RingtoneManager;
@@ -14,12 +13,10 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.speech.tts.TextToSpeech;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -28,6 +25,7 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -37,6 +35,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 @SuppressWarnings("ALL")
 public class zLocationService extends Service
@@ -89,14 +88,13 @@ public class zLocationService extends Service
         mainActivity = new U_ActivityMain();
 
         mHandler = new Handler();
+
         mRunnable = new Runnable()
         {
             @Override
             public void run()
             {
-                saveLocation(setLocation.getLatitude(), setLocation.getLongitude());
-
-                Toast.makeText(zLocationService.this, "Dispatch: Location Updated", Toast.LENGTH_SHORT).show();
+//                saveLocation(setLocation.getLatitude(), setLocation.getLongitude());
 
                 mHandler.postDelayed(this, 20000);
             }
@@ -115,6 +113,7 @@ public class zLocationService extends Service
             }
         });
 
+        getNotice();
         getNearby();
     }
 
@@ -143,47 +142,36 @@ public class zLocationService extends Service
 
     String distance;
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    private void createNotificationChanel()
+    private void createNotificationChanel(String title, String text)
     {
-        int ID = (int) System.currentTimeMillis();
-
-        String notificationChannelId = "Location";
-        String channelName = "Background Service";
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
-            NotificationChannel channel = new NotificationChannel(notificationChannelId, channelName , NotificationManager.IMPORTANCE_DEFAULT);
-            channel.setDescription(channelName);
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-
-            notificationManager.deleteNotificationChannel(channelName);
-            notificationManager.deleteNotificationChannel("Location channel id");
+            NotificationChannel channel = new NotificationChannel("responder", "responder notification", NotificationManager.IMPORTANCE_DEFAULT);
             notificationManager.createNotificationChannel(channel);
         }
 
-        Intent intent = new Intent(this, U_ActivitySplash.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, notificationChannelId)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "responder")
                 .setSmallIcon(R.drawable.fireicon)
-                .setContentTitle("Dispatch is running")
-                .setContentText("A firefighter is nearby! Distance: " + distance + "km")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-                .addAction(android.R.drawable.ic_media_play, "Open App", pendingIntent);
+                .setContentTitle(title)
+                .setContentText(text)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setSound(defaultSoundUri)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
+                .setAutoCancel(true);
 
-        notificationBuilder
-                .setDefaults(NotificationCompat.DEFAULT_SOUND)
-                .setSound(defaultSoundUri);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        {
+            builder.setCategory(NotificationCompat.CATEGORY_CALL)
+                    .setFullScreenIntent(null, true);
+        }
 
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        int notificationID = (int) System.currentTimeMillis();
 
-        notificationManager.notify(1, notificationBuilder.build());
+        notificationManager.notify(notificationID, builder.build());
     }
 
     @Override
@@ -224,6 +212,8 @@ public class zLocationService extends Service
         firebaseDatabase = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/");
         databaseReference = firebaseDatabase.getReference();
 
+        Map<String, Object> nearby = new HashMap<>();
+
         ValueEventListener valueEventListener = new ValueEventListener()
         {
             @Override
@@ -238,19 +228,53 @@ public class zLocationService extends Service
                         getAlarm = users.child("Settings").child("alarm").getValue(Boolean.class);
                     }
                 }
+            }
 
+            @Override
+            public void onCancelled(@NonNull DatabaseError error)
+            {
+
+            }
+        };
+        databaseReference.addValueEventListener(valueEventListener);
+
+        databaseReference.child("Users").child(userId).child("Responders").addListenerForSingleValueEvent(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot)
+            {
+                for(DataSnapshot change : snapshot.getChildren())
+                {
+                    String key = change.getKey();
+
+                    nearby.put("Nearby", false);
+                    databaseReference.child("Users").child(userId).child("Responders").child(key).updateChildren(nearby);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error)
+            {
+
+            }
+        });
+
+        databaseReference.child("Firefighter").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot)
+            {
                 fusedLocationClient.getLastLocation().addOnCompleteListener(task ->
                 {
                     if(task.isSuccessful())
                     {
                         Location location = task.getResult();
 
-                        for (DataSnapshot Snapshot : snapshot.child("Firefighter").getChildren())
+                        for (DataSnapshot Snapshot : snapshot.getChildren())
                         {
+                            String fighterKey = Snapshot.getKey();
+
                             if (Snapshot.hasChild("Settings"))
                             {
-                                Boolean onlineStatus = Snapshot.child("Settings").child("online status").getValue(Boolean.class);
-
                                 Double lat      = Snapshot.child("lat").getValue(Double.class);
                                 Double lng      = Snapshot.child("lng").getValue(Double.class);
                                 String userName   = Snapshot.child("userId").getValue(String.class);
@@ -272,61 +296,18 @@ public class zLocationService extends Service
 
                                 String getName  = null;
 
-                                if (calculate.calculateDistance(fighterLocation, userLocation) < 301
+                                distance = formattedDistance;
+
+                                if (calculate.calculateDistance(fighterLocation, userLocation) < 601
                                         && calculate.calculateDistance(fighterLocation, userLocation) >= 0)
                                 {
-                                    Toast.makeText(getApplicationContext(), "Notice", Toast.LENGTH_SHORT).show();
-
-                                    if(getAlarm == true)
-                                    {
-//                                            AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
-//                                            builder.setMessage(updatedUserName+" is nearby\nDistance: "+formattedDistance+"km");
-//                                            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener()
-//                                            {
-//                                                @Override
-//                                                public void onClick(DialogInterface dialog, int which)
-//                                                {
-//
-//                                                }
-//                                            });
-//                                            AlertDialog dialog = builder.create();
-//                                            dialog.show();
-
-
-//                                            Intent intent = new Intent(xLocationService.this, U_ActivityMain.class);
-//                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//                                            intent.putExtra("NOTIFICATION_TAPPED", false);
-//                                            PendingIntent pendingIntent = PendingIntent.getActivity(
-//                                                    xLocationService.this, 1, intent,
-//                                                    PendingIntent.FLAG_IMMUTABLE);
-//
-//                                            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(xLocationService.this, notificationChannelId);
-//
-//                                            notificationBuilder
-//                                                    .setOngoing(true)
-//                                                    .setContentTitle("You have a message")
-//                                                    .setContentText("A firefighter is nearby!\nDistance is "+formattedDistance+"kilometers")
-//                                                    .setPriority(NotificationCompat.PRIORITY_MIN)
-//                                                    .setCategory(NotificationCompat.CATEGORY_SERVICE)
-//                                                    .setContentIntent(pendingIntent)
-//                                                    .addAction(android.R.drawable.ic_media_pause, "Open application", pendingIntent);
-//
-//                                            Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-//                                            notificationBuilder.setDefaults(NotificationCompat.DEFAULT_SOUND);
-//                                            notificationBuilder.setSound(defaultSoundUri);
-//
-//                                            Notification notification = notificationBuilder.build();
-//
-//                                            startForeground(2, notification);
-                                        distance = formattedDistance;
-
-                                        new Notification();
-
-                                        createNotificationChanel();
-
-                                        String speech = "A firefighter is nearby! Distance is " + formattedDistance +"kilometers";
-                                        textToSpeech.speak(speech, TextToSpeech.QUEUE_ADD, null);
-                                    }
+                                    nearby.put("Nearby", true);
+                                    databaseReference.child("Users").child(userId).child("Responders").child(fighterKey).updateChildren(nearby);
+                                }
+                                else
+                                {
+                                    nearby.put("Nearby", false);
+                                    databaseReference.child("Users").child(userId).child("Responders").child(fighterKey).updateChildren(nearby);
                                 }
                             }
                         }
@@ -335,12 +316,57 @@ public class zLocationService extends Service
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error)
-            {
+            public void onCancelled(@NonNull DatabaseError error) {
 
             }
-        };
+        });
 
-        databaseReference.addValueEventListener(valueEventListener);
+    }
+
+    private void getNotice()
+    {
+        String userId = auth.getCurrentUser().getUid();
+
+        firebaseDatabase = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/");
+        databaseReference = firebaseDatabase.getReference();
+
+        databaseReference.child("Users").child(userId).child("Responders").addChildEventListener(new ChildEventListener()
+        {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName)
+            {
+               Boolean getNearby = snapshot.child("Nearby").getValue(Boolean.class);
+
+               if(snapshot.hasChild("Status"))
+               {
+                   Boolean status   = snapshot.child("Status").getValue(Boolean.class);
+
+                   if(getNearby == true && status == true)
+                   {
+                       createNotificationChanel("Responder","A firefighter is nearby!");
+                   }
+               }
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 }

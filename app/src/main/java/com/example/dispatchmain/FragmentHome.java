@@ -13,6 +13,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Looper;
 import android.speech.tts.TextToSpeech;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -342,7 +343,6 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
         super.onPause();
 
         fusedLocationClient.removeLocationUpdates(locationCallback);
-
     }
 
     @Override
@@ -353,7 +353,7 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(10000)
                 .setFastestInterval(5000);
-        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
     }
 
     public void setEvents()
@@ -1067,120 +1067,127 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
         firebaseDatabase = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/");
         databaseReference = firebaseDatabase.getReference();
 
-        ValueEventListener valueEventListener = new ValueEventListener()
+        if(((zDispatchApplication) getActivity().getApplicationContext()).isAppInForeground())
         {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot)
+            ValueEventListener valueEventListener = new ValueEventListener()
             {
-                if(!countr.isEmpty())
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot)
                 {
-                    countr.clear();
-                }
-
-                if(!responderCounter.isEmpty())
-                {
-                    responderCounter.clear();
-                }
-
-                fusedLocationClient.getLastLocation().addOnCompleteListener(task ->
-                {
-                    if(task.isSuccessful())
+                    if(!countr.isEmpty())
                     {
-                        Location location = task.getResult();
+                        countr.clear();
+                    }
 
-                        for (DataSnapshot Snapshot: snapshot.child("Firefighter").getChildren())
+                    if(!responderCounter.isEmpty())
+                    {
+                        responderCounter.clear();
+                    }
+
+                    fusedLocationClient.getLastLocation().addOnCompleteListener(task ->
+                    {
+                        if(task.isSuccessful())
                         {
-                            if(Snapshot.hasChild("Settings"))
+                            Location location = task.getResult();
+
+                            for (DataSnapshot Snapshot: snapshot.child("Firefighter").getChildren())
                             {
-                                Boolean onlineStatus = Snapshot.child("Settings").child("online status").getValue(Boolean.class);
-
-                                if(onlineStatus == true)
+                                if(Snapshot.hasChild("Settings"))
                                 {
-                                    Double lat = Snapshot.child("lat").getValue(Double.class);
-                                    Double lng = Snapshot.child("lng").getValue(Double.class);
+                                    Boolean onlineStatus = Snapshot.child("Settings").child("online status").getValue(Boolean.class);
 
-                                    LatLng fighterLocation = new LatLng(lat, lng);
-                                    LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-
-                                    if(calculate.calculateDistance(fighterLocation, userLocation) < 7001)
+                                    if(onlineStatus == true)
                                     {
-                                        countr.add(String.valueOf(onlineStatus));
+                                        Double lat = Snapshot.child("lat").getValue(Double.class);
+                                        Double lng = Snapshot.child("lng").getValue(Double.class);
 
+                                        LatLng fighterLocation = new LatLng(lat, lng);
+
+                                        LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+
+                                        if(calculate.calculateDistance(fighterLocation, userLocation) < 7001)
+                                        {
+                                            countr.add(String.valueOf(onlineStatus));
+
+                                            String responder = String.valueOf(countr.size());
+                                            textAvailable.setText("Available responder/s: " + responder);
+                                        }
+                                    }
+                                    else
+                                    {
                                         String responder = String.valueOf(countr.size());
                                         textAvailable.setText("Available responder/s: " + responder);
                                     }
                                 }
-                                else
-                                {
-                                    String responder = String.valueOf(countr.size());
-                                    textAvailable.setText("Available responder/s: " + responder);
-                                }
-                            }
-                        }
-
-                        for(DataSnapshot Snapshot: snapshot.child("Users").getChildren())
-                        {
-                            String checkID = Snapshot.getKey();
-
-                            if(userId == checkID)
-                            {
-                                long currentTime = System.currentTimeMillis();
-
-                                long thirtyMinutesInMillis = 30 * 60 * 1000;
-
-                                if(Snapshot.child("Report").hasChild("TimeStamp"))
-                                {
-                                    long timeStamp = Snapshot.child("Report").child("TimeStamp").getValue(Long.class);
-
-                                    if (currentTime - timeStamp >= thirtyMinutesInMillis)
-                                    {
-                                        firebaseDatabase.getReference().child("Users").child(userId).child("Report").child("Location").removeValue();
-                                    }
-                                }
                             }
 
-                            for(DataSnapshot Snapshot2: Snapshot.child("Responders").getChildren())
+                            for(DataSnapshot Snapshot: snapshot.child("Users").getChildren())
                             {
+                                String checkID = Snapshot.getKey();
+
                                 if(userId == checkID)
                                 {
-                                    String responderID = Snapshot2.getKey();
-                                    Boolean status = Snapshot2.child("Status").getValue(Boolean.class);
-
                                     long currentTime = System.currentTimeMillis();
 
-                                    if(Snapshot2.hasChild("TimeStamp"))
+                                    long thirtyMinutesInMillis = 30 * 60 * 1000;
+
+                                    if(Snapshot.child("Report").hasChild("TimeStamp"))
                                     {
-                                        long timeStamp = Snapshot2.child("TimeStamp").getValue(Long.class);
-                                        long checkTime = 30 * 60 * 1000;
+                                        long timeStamp = Snapshot.child("Report").child("TimeStamp").getValue(Long.class);
 
-                                        if(status == true && currentTime - timeStamp <= checkTime)
+                                        if (currentTime - timeStamp >= thirtyMinutesInMillis)
                                         {
-                                            responderCounter.add(String.valueOf(status));
-
-                                            String responderCount = String.valueOf(responderCounter.size());
-                                            textResponders.setText("Responder/s: " + responderCount);
+                                            firebaseDatabase.getReference().child("Users").child(userId).child("Report").child("Location").removeValue();
                                         }
-                                        else
+                                    }
+                                }
+
+                                for(DataSnapshot Snapshot2: Snapshot.child("Responders").getChildren())
+                                {
+                                    if(userId == checkID)
+                                    {
+                                        String responderID = Snapshot2.getKey();
+                                        Boolean status = Snapshot2.child("Status").getValue(Boolean.class);
+
+                                        long currentTime = System.currentTimeMillis();
+
+                                        if(Snapshot2.hasChild("TimeStamp"))
                                         {
-                                            String responderCount = String.valueOf(responderCounter.size());
-                                            textResponders.setText("Responder/s: " + responderCount);
+                                            long timeStamp = Snapshot2.child("TimeStamp").getValue(Long.class);
+                                            long checkTime = 30 * 60 * 1000;
+
+                                            if(status == true && currentTime - timeStamp <= checkTime)
+                                            {
+                                                responderCounter.add(String.valueOf(status));
+
+                                                String responderCount = String.valueOf(responderCounter.size());
+                                                textResponders.setText("Responder/s: " + responderCount);
+                                            }
+                                            else
+                                            {
+                                                String responderCount = String.valueOf(responderCounter.size());
+                                                textResponders.setText("Responder/s: " + responderCount);
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
-                });
-            }
+                    });
+                }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error)
-            {
+                @Override
+                public void onCancelled(@NonNull DatabaseError error)
+                {
 
-            }
-        };
+                }
+            };
 
-        databaseReference.addValueEventListener(valueEventListener);
+            databaseReference.addValueEventListener(valueEventListener);
+        }
+
+
+
     }
 
     public void hideKeyboard(View view)

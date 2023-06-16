@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.speech.tts.TextToSpeech;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,12 +44,17 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 @SuppressWarnings("ALL")
 public class U_ActivityMain extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener,
         NavigationView.OnNavigationItemSelectedListener {
+
+    zLocationService mLocationService;
+    Intent mServiceIntent;
 
     FirebaseAuth auth = FirebaseAuth.getInstance();
     FirebaseUser currentUser = auth.getCurrentUser();
@@ -80,6 +86,8 @@ public class U_ActivityMain extends AppCompatActivity implements BottomNavigatio
     zCalculations calculate = new zCalculations(this);
 
     TextToSpeech textToSpeech;
+
+    U_ActivitySplash u_activitySplash = new U_ActivitySplash();
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -131,6 +139,39 @@ public class U_ActivityMain extends AppCompatActivity implements BottomNavigatio
         firebaseDatabase = FirebaseDatabase.getInstance("https://dispatchmain-22ce5-default-rtdb.asia-southeast1.firebasedatabase.app/");
         databaseReference = firebaseDatabase.getReference();
 
+        Map<String, Object> changeStatus = new HashMap<>();
+
+        databaseReference.child("Users").child(userId).child("Responders").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot)
+            {
+                long currentTime    = System.currentTimeMillis();
+                long changeTime     = 30 * 60 * 1000;
+
+                for (DataSnapshot responds : snapshot.getChildren())
+                {
+                    String key = responds.getKey();
+
+                    if(responds.hasChild("TimeStamp"))
+                    {
+                        long time = responds.child("TimeStamp").getValue(Long.class);
+
+                        if(currentTime - time >= changeTime)
+                        {
+                            changeStatus.put("Status", false);
+                            databaseReference.child("Users").child(userId).child("Responders").child(key).updateChildren(changeStatus);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error)
+            {
+
+            }
+        });
+
         ChildEventListener respondersListener = new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
@@ -142,6 +183,7 @@ public class U_ActivityMain extends AppCompatActivity implements BottomNavigatio
             {
                 Boolean checkStatus = snapshot.child("Status").getValue(Boolean.class);
                 String userID       = snapshot.getKey();
+
                 String updatedUserName = null;
 
                 if (userID != null && userID.length() > 20)
@@ -153,11 +195,17 @@ public class U_ActivityMain extends AppCompatActivity implements BottomNavigatio
                 {
                     if (checkStatus)
                     {
-                        showNotification(updatedUserName+" is responding!", "Responding");
+                        if(((zDispatchApplication) getApplicationContext()).isAppInForeground())
+                        {
+                            showNotification(updatedUserName+" is responding!", "Responding");
+                        }
                     }
                     else
                     {
-                        showNotification(updatedUserName+" cancelled the response!", "Cancelled");
+                        if(((zDispatchApplication) getApplicationContext()).isAppInForeground())
+                        {
+                            showNotification(updatedUserName+" not responding", "Cancelled");
+                        }
                     }
                 }
             }
@@ -185,7 +233,8 @@ public class U_ActivityMain extends AppCompatActivity implements BottomNavigatio
     {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
             NotificationChannel channel = new NotificationChannel("responder", "responder notification", NotificationManager.IMPORTANCE_DEFAULT);
             notificationManager.createNotificationChannel(channel);
         }
@@ -211,8 +260,6 @@ public class U_ActivityMain extends AppCompatActivity implements BottomNavigatio
 
         notificationManager.notify(notificationID, builder.build());
     }
-
-
 
     public void bottomNavigation()
     {
@@ -382,8 +429,6 @@ public class U_ActivityMain extends AppCompatActivity implements BottomNavigatio
                 drawerN.setText(firstName + " " + lastName);
                 drawerE.setText(email);
 
-
-
             }
 
             @Override
@@ -479,11 +524,12 @@ public class U_ActivityMain extends AppCompatActivity implements BottomNavigatio
     protected void onStart()
     {
         super.onStart();
+
         LocationRequest locationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(10000)
                 .setFastestInterval(5000);
-        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
     }
 
     @Override
@@ -492,5 +538,39 @@ public class U_ActivityMain extends AppCompatActivity implements BottomNavigatio
         super.onPause();
 
         fusedLocationClient.removeLocationUpdates(locationCallback);
+
+        startServiceFunc();
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+
+        startServiceFunc();
+    }
+
+    public void startServiceFunc()
+    {
+        mLocationService = new zLocationService();
+
+        mServiceIntent = new Intent(this, mLocationService.getClass());
+
+        if (!zUtil.isMyServiceRunning(mLocationService.getClass(), this))
+        {
+            startService(mServiceIntent);
+        }
+    }
+
+    public void stopServiceFunc()
+    {
+        mLocationService = new zLocationService();
+
+        mServiceIntent = new Intent(this, mLocationService.getClass());
+
+        if (zUtil.isMyServiceRunning(mLocationService.getClass(), this))
+        {
+            stopService(mServiceIntent);
+        }
     }
 }
