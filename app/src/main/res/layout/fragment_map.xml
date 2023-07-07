@@ -73,10 +73,10 @@
 
                 <ImageView
                     android:id="@+id/findStations"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:scaleType="fitXY"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_margin="10dp"
+                    android:scaleType="fitXY"
                     app:srcCompat="@drawable/ic_baseline_fire_extinguisher_24"
                     app:tint="#FABB9D" />
 

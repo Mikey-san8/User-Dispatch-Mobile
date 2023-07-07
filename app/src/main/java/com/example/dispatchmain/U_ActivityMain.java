@@ -32,6 +32,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -59,12 +60,11 @@ public class U_ActivityMain extends AppCompatActivity implements BottomNavigatio
     FirebaseAuth auth = FirebaseAuth.getInstance();
     FirebaseUser currentUser = auth.getCurrentUser();
 
-    FragmentHome mainFragment = new FragmentHome();
-    FragmentRecord recordFragment = new FragmentRecord();
-    FragmentMap mapFragment = new FragmentMap();
-    FragmentChat chatFragment = new FragmentChat();
-    FragmentEditProfile editFragment = new FragmentEditProfile();
-    FragmentSettings settingsFragment = new FragmentSettings();
+    FragmentHome        mainFragment        = new FragmentHome();
+    FragmentRecord      recordFragment      = new FragmentRecord();
+    FragmentMap         mapFragment         = new FragmentMap();
+    FragmentChat        chatFragment        = new FragmentChat();
+    FragmentSettings    settingsFragment    = new FragmentSettings();
 
     BottomNavigationView bottomNavigationView;
 
@@ -158,9 +158,12 @@ public class U_ActivityMain extends AppCompatActivity implements BottomNavigatio
 
                         if(currentTime - time >= changeTime)
                         {
-                            changeStatus.put("Status", false);
-                            databaseReference.child("Users").child(userId).child("Responders").child(key).updateChildren(changeStatus);
+                            databaseReference.child("Users").child(userId).child("Responders").child(key).removeValue();
                         }
+                    }
+                    else
+                    {
+                        databaseReference.child("Users").child(userId).child("Responders").child(key).removeValue();
                     }
                 }
             }
@@ -186,25 +189,31 @@ public class U_ActivityMain extends AppCompatActivity implements BottomNavigatio
 
                 String updatedUserName = null;
 
-                if (userID != null && userID.length() > 20)
+                if(snapshot.exists())
                 {
-                    updatedUserName = "firefighter." + userID.substring(0, userID.length() - 20);
-                }
-
-                if (checkStatus != null)
-                {
-                    if (checkStatus)
+                    if(snapshot.hasChildren())
                     {
-                        if(((zDispatchApplication) getApplicationContext()).isAppInForeground())
+                        if (userID != null && userID.length() > 20)
                         {
-                            showNotification(updatedUserName+" is responding!", "Responding");
+                            updatedUserName = "firefighter." + userID.substring(0, userID.length() - 20);
                         }
-                    }
-                    else
-                    {
-                        if(((zDispatchApplication) getApplicationContext()).isAppInForeground())
+
+                        if (checkStatus != null)
                         {
-                            showNotification(updatedUserName+" not responding", "Cancelled");
+                            if (checkStatus)
+                            {
+                                if(!((zDispatchApplication) getApplicationContext()).isAppInForeground())
+                                {
+                                    showNotification(updatedUserName+" is responding!", "Responding");
+                                }
+                            }
+                            else
+                            {
+                                if(!((zDispatchApplication) getApplicationContext()).isAppInForeground())
+                                {
+                                    showNotification(updatedUserName+" not responding", "Cancelled");
+                                }
+                            }
                         }
                     }
                 }
@@ -227,6 +236,53 @@ public class U_ActivityMain extends AppCompatActivity implements BottomNavigatio
         };
 
         databaseReference.child("Users").child(userId).child("Responders").addChildEventListener(respondersListener);
+
+        Map<String, Object> nearby = new HashMap<>();
+
+        databaseReference.child("Firefighter").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot)
+            {
+                fusedLocationClient.getLastLocation().addOnCompleteListener(task ->
+                {
+                    if(task.isSuccessful())
+                    {
+                        Location location = task.getResult();
+
+                        for (DataSnapshot Snapshot : snapshot.getChildren())
+                        {
+                            String fighterKey = Snapshot.getKey();
+
+                            if (Snapshot.hasChild("Settings"))
+                            {
+                                Double lat      = Snapshot.child("lat").getValue(Double.class);
+                                Double lng      = Snapshot.child("lng").getValue(Double.class);
+
+                                LatLng fighterLocation = new LatLng(lat, lng);
+                                LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+
+                                if (calculate.calculateDistance(fighterLocation, userLocation) < 601
+                                        && calculate.calculateDistance(fighterLocation, userLocation) >= 0)
+                                {
+                                    nearby.put("Nearby", true);
+                                    databaseReference.child("Users").child(userId).child("Responders").child(fighterKey).updateChildren(nearby);
+                                }
+                                else
+                                {
+                                    nearby.put("Nearby", false);
+                                    databaseReference.child("Users").child(userId).child("Responders").child(fighterKey).updateChildren(nearby);
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     private void showNotification(String message, String title)
@@ -268,13 +324,8 @@ public class U_ActivityMain extends AppCompatActivity implements BottomNavigatio
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
 
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.container, editFragment, "edit_fragment")
-                .addToBackStack(null)
-                .commit();
-
-        getSupportFragmentManager().beginTransaction()
                 .add(R.id.container, mainFragment, "home_fragment")
-                .addToBackStack(null)
+                .addToBackStack("home")
                 .commit();
 
         bottomNavigationView.setSelectedItemId(R.id.btmHome);
@@ -509,6 +560,8 @@ public class U_ActivityMain extends AppCompatActivity implements BottomNavigatio
                 }
             }, 2000);
         }
+
+
     }
 
     private final LocationCallback locationCallback = new LocationCallback()

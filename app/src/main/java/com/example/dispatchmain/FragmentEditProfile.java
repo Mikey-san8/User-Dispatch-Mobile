@@ -1,8 +1,6 @@
 package com.example.dispatchmain;
 
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,14 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.AutocompletePrediction;
-import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
-import com.google.android.libraries.places.api.model.RectangularBounds;
-import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
-import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -38,7 +28,6 @@ import java.util.Map;
 
 public class FragmentEditProfile extends Fragment
 {
-
     View edit;
 
     public EditText firstname, lastname, phone, email, address;
@@ -53,13 +42,9 @@ public class FragmentEditProfile extends Fragment
 
     public ArrayAdapter<String> placeAdapter;
 
-    public ListView searhPlace;
-
-    private PlacesClient placesClient;
+    public ListView searchPlace;
 
     FragmentCheckProfile fragmentCheckProfile = new FragmentCheckProfile();
-
-    String API_KEY = "AIzaSyDKmNOWX9-j1NyReDFb6-5R9P2wdIKJvyg";
 
     public FragmentEditProfile()
     {
@@ -71,11 +56,11 @@ public class FragmentEditProfile extends Fragment
     {
         super.onCreate(savedInstanceState);
 
-        if (!Places.isInitialized())
-        {
-            Places.initialize(requireContext(), API_KEY);
-        }
-        placesClient = Places.createClient(requireContext());
+//        if (!Places.isInitialized())
+//        {
+//            Places.initialize(requireContext(), API_KEY);
+//        }
+//        placesClient = Places.createClient(requireContext());
     }
 
     @Nullable
@@ -98,7 +83,7 @@ public class FragmentEditProfile extends Fragment
         email = edit.findViewById(R.id.editEmail);
         address = edit.findViewById(R.id.editAddress);
 
-        searhPlace = edit.findViewById(R.id.listSearch);
+        searchPlace = edit.findViewById(R.id.listSearch);
 
         bottomSheetView = edit.findViewById(R.id.searchSheet);
 
@@ -108,58 +93,58 @@ public class FragmentEditProfile extends Fragment
 
         placeAdapter = new ArrayAdapter<>(getContext(), R.layout.list_search, R.id.searchList, placeArray);
 
-        searhPlace.setAdapter(placeAdapter);
+        searchPlace.setAdapter(placeAdapter);
 
-        address.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after)
-            {
-                bottomSheetSearch.setState(BottomSheetBehavior.STATE_EXPANDED);
-            }
+//        address.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after)
+//            {
+//                bottomSheetSearch.setState(BottomSheetBehavior.STATE_EXPANDED);
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//
+//                AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
+//
+//                RectangularBounds bounds = RectangularBounds.newInstance
+//                        (
+//                                new LatLng(5, 114),
+//                                new LatLng(21, 127));
+//
+//                FindAutocompletePredictionsRequest builder = FindAutocompletePredictionsRequest.builder()
+//                        .setLocationBias(bounds)
+//                        .setCountry("PH")
+//                        .setSessionToken(token)
+//                        .setQuery(address.getText().toString())
+//                        .build();
+//
+//                placesClient.findAutocompletePredictions(builder).addOnSuccessListener(response ->
+//                {
+//                    for (AutocompletePrediction prediction : response.getAutocompletePredictions())
+//                    {
+//                        placeArray.add(String.valueOf(prediction.getFullText(null)));
+//                        placeAdapter.notifyDataSetChanged();
+//                    }
+//
+//                }).addOnFailureListener((exception) ->
+//                {
+//                    if (exception instanceof ApiException) {
+//                        ApiException apiException = (ApiException) exception;
+//                    }
+//                });
+//
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s)
+//            {
+//                placeArray.clear();
+//                placeAdapter.notifyDataSetChanged();
+//            }
+//        });
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-                AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
-
-                RectangularBounds bounds = RectangularBounds.newInstance
-                        (
-                                new LatLng(5, 114),
-                                new LatLng(21, 127));
-
-                FindAutocompletePredictionsRequest builder = FindAutocompletePredictionsRequest.builder()
-                        .setLocationBias(bounds)
-                        .setCountry("PH")
-                        .setSessionToken(token)
-                        .setQuery(address.getText().toString())
-                        .build();
-
-                placesClient.findAutocompletePredictions(builder).addOnSuccessListener(response ->
-                {
-                    for (AutocompletePrediction prediction : response.getAutocompletePredictions())
-                    {
-                        placeArray.add(String.valueOf(prediction.getFullText(null)));
-                        placeAdapter.notifyDataSetChanged();
-                    }
-
-                }).addOnFailureListener((exception) ->
-                {
-                    if (exception instanceof ApiException) {
-                        ApiException apiException = (ApiException) exception;
-                    }
-                });
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s)
-            {
-                placeArray.clear();
-                placeAdapter.notifyDataSetChanged();
-            }
-        });
-
-        searhPlace.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        searchPlace.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)

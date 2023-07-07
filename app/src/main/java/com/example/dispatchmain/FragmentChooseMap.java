@@ -163,14 +163,15 @@ public class FragmentChooseMap extends Fragment implements OnMapReadyCallback {
                     });
                     builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                         @Override
-                        public void onClick(DialogInterface dialog, int which) {
+                        public void onClick(DialogInterface dialog, int which)
+                        {
                             Bundle bundle = new Bundle();
                             bundle.putString("getaddress", addressText);
                             homeFragment.setArguments(bundle);
 
                             homeFragment.bottomSheetCall.setDraggable(true);
 
-                            getFragmentManager().popBackStack();
+                            getParentFragmentManager().popBackStack();
 
                             homeFragment.showAddress();
                         }

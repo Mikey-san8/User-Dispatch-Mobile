@@ -88,6 +88,14 @@
         app:srcCompat="@drawable/circle_button"
         app:tint="#FF7272" />
 
+
+    <ProgressBar
+        android:id="@+id/progressBarHome"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
+
     <TextView
         android:id="@+id/textView7"
         android:layout_width="wrap_content"

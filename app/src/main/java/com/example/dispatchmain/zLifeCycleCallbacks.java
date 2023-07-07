@@ -13,31 +13,38 @@ public class zLifeCycleCallbacks implements Application.ActivityLifecycleCallbac
 
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-    }
-
-    @Override
-    public void onActivityStarted(Activity activity) {
-    }
-
-    @Override
-    public void onActivityResumed(Activity activity) {
         isAppInForeground = true;
     }
 
     @Override
-    public void onActivityPaused(Activity activity) {
+    public void onActivityStarted(Activity activity) {
+        isAppInForeground = true;
+    }
+
+    @Override
+    public void onActivityResumed(Activity activity)
+    {
+        isAppInForeground = true;
+    }
+
+    @Override
+    public void onActivityPaused(Activity activity)
+    {
         isAppInForeground = false;
     }
 
     @Override
     public void onActivityStopped(Activity activity) {
+
     }
 
     @Override
     public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+        isAppInForeground = true;
     }
 
     @Override
     public void onActivityDestroyed(Activity activity) {
+        isAppInForeground = false;
     }
 }

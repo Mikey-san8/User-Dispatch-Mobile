@@ -109,7 +109,8 @@ import java.util.Objects;
 public class FragmentMap extends Fragment implements OnMapReadyCallback, View.OnClickListener, AdapterView.OnItemClickListener, GoogleMap.OnPolylineClickListener
 {
     FirebaseAuth auth = FirebaseAuth.getInstance();
-    String API_KEY = "AIzaSyDKmNOWX9-j1NyReDFb6-5R9P2wdIKJvyg";
+
+    String API_KEY = "AIzaSyAP-IkIEmtq7bvYGusX6kaICdpcytjFgOU";
 
     private SupportMapFragment mapFragment;
 

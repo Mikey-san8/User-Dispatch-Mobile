@@ -1,5 +1,6 @@
 package com.example.dispatchmain;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
@@ -32,7 +33,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -142,7 +142,7 @@ public class zLocationService extends Service
 
     String distance;
 
-    private void createNotificationChanel(String title, String text)
+    private Notification createNotificationChanel(String title, String text)
     {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -172,6 +172,8 @@ public class zLocationService extends Service
         int notificationID = (int) System.currentTimeMillis();
 
         notificationManager.notify(notificationID, builder.build());
+
+        return builder.build();
     }
 
     @Override
@@ -277,26 +279,9 @@ public class zLocationService extends Service
                             {
                                 Double lat      = Snapshot.child("lat").getValue(Double.class);
                                 Double lng      = Snapshot.child("lng").getValue(Double.class);
-                                String userName   = Snapshot.child("userId").getValue(String.class);
-                                String updatedUserName = null;
-
-                                if (userName != null && userName.length() > 20)
-                                {
-                                    updatedUserName = "fighter." + userName.substring(0, userName.length() - 20);
-                                }
 
                                 LatLng fighterLocation = new LatLng(lat, lng);
                                 LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-
-                                double getDistance = calculate.calculateDistance(fighterLocation, userLocation) / 1000;
-
-                                DecimalFormat decimalFormat = new DecimalFormat("#.##");
-
-                                String formattedDistance = decimalFormat.format(getDistance);
-
-                                String getName  = null;
-
-                                distance = formattedDistance;
 
                                 if (calculate.calculateDistance(fighterLocation, userLocation) < 601
                                         && calculate.calculateDistance(fighterLocation, userLocation) >= 0)
@@ -341,14 +326,20 @@ public class zLocationService extends Service
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName)
             {
                Boolean getNearby = snapshot.child("Nearby").getValue(Boolean.class);
+               Boolean status    = null;
 
-               if(snapshot.hasChild("Status"))
+                if(snapshot.hasChild("Status"))
                {
-                   Boolean status   = snapshot.child("Status").getValue(Boolean.class);
+                   status = snapshot.child("Status").getValue(Boolean.class);
 
-                   if(getNearby == true && status == true)
+                   if(getNearby == true && status != null)
                    {
-                       createNotificationChanel("Responder","A firefighter is nearby!");
+                       if(status)
+                       {
+                           int ID = (int) System.currentTimeMillis();
+
+                           createNotificationChanel("Responder","A firefighter is nearby!");
+                       }
                    }
                }
             }

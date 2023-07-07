@@ -202,30 +202,61 @@
 
             </LinearLayout>
 
-            <androidx.cardview.widget.CardView
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:layout_marginEnd="20dp"
-                android:layout_gravity="right"
-                android:backgroundTint="#FF9999">
+                android:layout_marginEnd="20dp">
 
-                <TextView
-                    android:id="@+id/chooseFromMap"
+                <androidx.cardview.widget.CardView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Choose from map"
-                    android:textStyle="bold"
-                    android:textSize="9sp"
-                    android:gravity="center"
-                    android:textColor="#FFFFFF"
-                    android:layout_margin="7dp"
-                    app:drawableEndCompat="@drawable/ic_baseline_pin_drop_24"
-                    android:drawablePadding="5dp"
-                    app:drawableTint="#FFFFFF"
-                    tools:ignore="SmallSp" />
+                    android:backgroundTint="#FF9999"
+                    android:layout_toStartOf="@+id/cardChoose"
+                    android:layout_marginEnd="5dp">
 
-            </androidx.cardview.widget.CardView>
+                    <TextView
+                        android:id="@+id/uploadImage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Upload image"
+                        android:textStyle="bold"
+                        android:textSize="9sp"
+                        android:gravity="center"
+                        android:textColor="#FFFFFF"
+                        android:layout_margin="7dp"
+                        app:drawableEndCompat="@drawable/ic_baseline_file_upload_24"
+                        android:drawablePadding="5dp"
+                        app:drawableTint="#FFFFFF"
+                        tools:ignore="SmallSp" />
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardChoose"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:backgroundTint="#FF9999">
+
+                    <TextView
+                        android:id="@+id/chooseFromMap"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Choose from map"
+                        android:textStyle="bold"
+                        android:textSize="9sp"
+                        android:gravity="center"
+                        android:textColor="#FFFFFF"
+                        android:layout_margin="7dp"
+                        app:drawableEndCompat="@drawable/ic_baseline_pin_drop_24"
+                        android:drawablePadding="5dp"
+                        app:drawableTint="#FFFFFF"
+                        tools:ignore="SmallSp" />
+
+                </androidx.cardview.widget.CardView>
+
+            </RelativeLayout>
 
             <TextView
                 android:layout_width="wrap_content"

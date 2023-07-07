@@ -32,6 +32,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -68,6 +69,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -83,7 +87,7 @@ import java.util.Map;
 @SuppressWarnings("ALL")
 public class FragmentHome extends Fragment implements View.OnClickListener, AdapterView.OnItemClickListener, View.OnTouchListener
 {
-    public String API_KEY = "AIzaSyDKmNOWX9-j1NyReDFb6-5R9P2wdIKJvyg";
+    public String API_KEY = "AIzaSyAP-IkIEmtq7bvYGusX6kaICdpcytjFgOU";
 
     public View main;
 
@@ -157,6 +161,8 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
     String userAnonymous;
 
     zCalculations calculate;
+
+    ProgressBar progressBar;
 
     public FragmentHome()
     {
@@ -247,6 +253,7 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
                     if(!(placeLatLng == null) || !placeLatLng.equals(location))
                     {
                         textCurrent = main.findViewById(R.id.textCurrent);
+
                         if(holder == "location")
                         {
                             textCurrent.setText(name + ", " + address);
@@ -349,6 +356,19 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
     public void onResume()
     {
         super.onResume();
+
+        LocationRequest locationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(10000)
+                .setFastestInterval(5000);
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
         LocationRequest locationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(10000)
@@ -358,6 +378,7 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
 
     public void setEvents()
     {
+        progressBar = main.findViewById(R.id.progressBarHome);
         calculate = new zCalculations(main.getContext());
 
         endIcon();
@@ -400,6 +421,7 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
         main            .findViewById(R.id.chooseFromMap)       .setOnClickListener(this);
         main            .findViewById(R.id.checkProfile)        .setOnClickListener(this);
         main            .findViewById(R.id.arrowDown)           .setOnClickListener(this);
+        main            .findViewById(R.id.uploadImage)         .setOnClickListener(this);
 
         linearMainLayout    = main.findViewById(R.id.linearMainLayout);
         linearResponder     = main.findViewById(R.id.linearResponder);
@@ -552,6 +574,9 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
         }
     }
 
+    private static final int PICK_IMAGE_REQUEST = 1;
+    private StorageReference storageReference;
+
     @Override
     public void onClick(View v)
     {
@@ -565,7 +590,7 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
         {
             case R.id.fire_btn2:
 
-                if(!(textCurrent == null))
+                if(textCurrent != null)
                 {
                     String holderName = "list";
                     bottomSheetCall.setState(BottomSheetBehavior.STATE_EXPANDED);
@@ -707,12 +732,18 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
 
                 bottomSheetCall.setState(BottomSheetBehavior.STATE_EXPANDED);
                 bottomSheetCall.setDraggable(false);
-
+                
+                break;
+            case R.id.uploadImage:
+                uploadImg();
                 break;
             case R.id.checkProfile:
-                FragmentCheckProfile fragmentCheckProfile = new FragmentCheckProfile();
+
+                FragmentEditProfile editFragment            = new FragmentEditProfile();
+                FragmentCheckProfile fragmentCheckProfile   = new FragmentCheckProfile();
 
                 transaction
+                        .add(R.id.container, editFragment, "edit_fragment")
                         .replace(R.id.container, fragmentCheckProfile, "check_fragment")
                         .addToBackStack(null)
                         .commit();
@@ -724,9 +755,43 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
         }
     }
 
-    public void whenTyping()
-    {
+    public void uploadImg() {
+        storageReference = FirebaseStorage.getInstance().getReference();
 
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Image"), PICK_IMAGE_REQUEST);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
+            Uri imageUri = data.getData();
+
+            String userKey = auth.getCurrentUser().getUid();;
+
+            uploadImage(imageUri, userKey);
+        }
+    }
+
+    private void uploadImage(Uri filePath, String userKey) {
+        StorageReference imageRef = storageReference.child("images/" + userKey + "/" + filePath.getLastPathSegment());
+
+        UploadTask uploadTask = imageRef.putFile(filePath);
+        uploadTask.addOnSuccessListener(taskSnapshot -> {
+            Toast.makeText(requireContext(), "Image uploaded successfully", Toast.LENGTH_SHORT).show();
+            TextView upload;
+            upload = main.findViewById(R.id.uploadImage);
+            upload.setText(filePath.getLastPathSegment());
+        }).addOnFailureListener(e -> {
+            Toast.makeText(requireContext(), "Image upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    public void whenTyping() {
         userL.addTextChangedListener(new TextWatcher()
         {
         @Override
@@ -1186,8 +1251,7 @@ public class FragmentHome extends Fragment implements View.OnClickListener, Adap
             databaseReference.addValueEventListener(valueEventListener);
         }
 
-
-
+        progressBar.setVisibility(View.INVISIBLE);
     }
 
     public void hideKeyboard(View view)
